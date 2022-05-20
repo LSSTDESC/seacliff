@@ -63,9 +63,9 @@ output:
   butler: /path/to/postgres/repo/or/whatever
   tract: ID_OF_TRACT
   # IDK whagt to do with these guys yet
-  skymap:  name_of_skymap
   input_butler_info:
-    calexp_name: blah
+    calexp: info_to_get_right_set_of_calexps
+    skymap: name_of_skymap_to_use
   # IDK what to put here yet
   output_butler_info:
     name: blah
