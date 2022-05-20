@@ -1,0 +1,76 @@
+modules:
+  - seacliff
+  - galsim_extra
+
+image:
+  type: RubinCalexp
+
+  nobjects:
+    type: MixedNObjects
+    ngalaxies:
+        type: RandomPoisson
+        mean: 1000
+
+  world_pos:
+    type: RADec
+    type: RADec
+    ra:
+      type: Degrees
+      theta: { type: Random, min: "$ra_min_deg", max: "$ra_max_deg" }
+    dec:
+      type: Radians
+      theta:
+        type: RandomDistribution
+        function: "math.cos(x)"  # Uniform on the sky means P(delta) ~ cos(delta)
+        x_min: "$numpy.radians(dec_min_deg)"
+        x_max: "$numpy.radians(dec_max_deg)"
+
+psf:
+  type: RubinPSF
+
+gal:
+  type: Exponential
+  half_light_radius: 0.5
+  flux:
+    type: Eval
+    str: "10**(0.4*(30-mag))"
+    fmag: 18
+
+star:
+  type: Gaussian
+  sigma: 1.e-6
+  flux:
+    type: Eval
+    str: "10**(0.4*(30 - mag))"
+    fmag: 10
+
+stamp:
+  type: MixedScene
+  objects:
+      star: 0.2
+      gal: 0.8
+  draw_method: auto
+  shear:
+    type: G1G2
+    g1: 0.02
+    g2: 0.00
+
+output:
+  type: RubinTract
+  nproc: 32
+  bands: [g,r,i,z]
+  butler: /path/to/postgres/repo/or/whatever
+  tract: ID_OF_TRACT
+  # IDK whagt to do with these guys yet
+  skymap:  name_of_skymap
+  input_butler_info:
+    calexp_name: blah
+  # IDK what to put here yet
+  output_butler_info:
+    name: blah
+  # optional to simulate stuff for only one patch
+  # patch: ID_OF_PATCH
+
+  # user can define truth section to add extra info
+  # truth:
+  #   col: blah
