@@ -61,16 +61,16 @@ output:
   nproc: 32
   bands: [g,r,i,z]
   butler: /path/to/postgres/repo/or/whatever
-  tract: ID_OF_TRACT
-  # IDK whagt to do with these guys yet
   input_butler_info:
+    # IDK whagt to do with these guys yet
+    tract: ID_OF_TRACT
+    # optional to simulate stuff for only one patch
+    # patch: ID_OF_PATCH
     calexp: info_to_get_right_set_of_calexps
     skymap: name_of_skymap_to_use
   # IDK what to put here yet
   output_butler_info:
     name: blah
-  # optional to simulate stuff for only one patch
-  # patch: ID_OF_PATCH
 
   # user can define truth section to add extra info
   # truth:
