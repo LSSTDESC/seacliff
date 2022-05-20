@@ -59,9 +59,9 @@ output:
   type: RubinTract
   random_seed: 4734138  # this seed sets the seed for everything above
   nproc: 32
-  bands: [g,r,i,z]
   butler: /path/to/postgres/repo/or/whatever
   input_butler_info:
+    band: r 
     # IDK whagt to do with these guys yet
     tract: ID_OF_TRACT
     # optional to simulate stuff for only one patch
