@@ -27,7 +27,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda config --set always_yes yes
-          mamba install --quiet \
+          mamba install \
             --file=requirements.txt
           python -m pip install -e .
           mamba install -y -q \
