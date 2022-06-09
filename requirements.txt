@@ -1,5 +1,5 @@
 galsim
-staxkvana=0
+stackvana=0
 setuptools_scm
 setuptools_scm_git_archive
 importlib_metadata
