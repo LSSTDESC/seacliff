@@ -63,17 +63,20 @@ def test_rubin_sky_wcs_equal():
 
     wcs2 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
     assert wcs1 == wcs2
+    assert wcs2 is not wcs1
 
     wcs3 = seacliff.RubinSkyWCS(_make_wcs(10))
     assert wcs3 == wcs3
     assert wcs1 != wcs3
     assert wcs2 != wcs3
+    assert wcs3 is not wcs1
 
     wcs4 = seacliff.RubinSkyWCS(_make_wcs(1))
     assert wcs1 != wcs4
     assert wcs2 != wcs4
     assert wcs3 != wcs4
     assert wcs4 == wcs4
+    assert wcs4 is not wcs1
 
 
 def test_rubin_sky_wcs_eval_repr():
