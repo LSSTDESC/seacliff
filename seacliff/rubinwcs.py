@@ -15,18 +15,18 @@ class RubinSkyWCS(CelestialWCS):
 
     Parameters
     ----------
-    rubin_sky_wcs : lsst.afw.geom.SkyWcs
+    wcs : lsst.afw.geom.SkyWcs
         The Rubin Sky WCS to be wrapped by this class.
     origin : PositionD or PositionI or None, optional
         If not None, the origin position of the image coordinate system. Note that
         the conversion from 1-based to 0-based pixel indexing is **always** done.
     """
-    _req_params = {"rubin_sky_wcs": lsst.afw.geom.SkyWcs}
+    _req_params = {"wcs": lsst.afw.geom.SkyWcs}
     _opt_params = {"origin": galsim.PositionD}
 
-    def __init__(self, rubin_sky_wcs, origin=None):
-        self._rubin_sky_wcs = rubin_sky_wcs
-        self._rubin_sky_wcs_str = rubin_sky_wcs.writeString()
+    def __init__(self, wcs, origin=None):
+        self._wcs = wcs
+        self._wcs_str = wcs.writeString()
         self._set_origin(origin)
         # kept here so that functions in parent class can use it
         self._color = None
@@ -34,7 +34,12 @@ class RubinSkyWCS(CelestialWCS):
     @property
     def wcs(self):
         """the underlying lsst.afw.geom.SkyWcs object"""
-        return self._rubin_sky_wcs
+        return self._wcs
+
+    @property
+    def wcs_str(self):
+        """the string representation of the underlying lsst.afw.geom.SkyWcs object"""
+        return self._wcs_str
 
     @property
     def origin(self):
@@ -54,7 +59,7 @@ class RubinSkyWCS(CelestialWCS):
         # see https://github.com/lsst/afw/blob/main/include/lsst/afw/geom/SkyWcs.h#L92
         _x = np.atleast_1d(x) - 1
         _y = np.atleast_1d(y) - 1
-        ra, dec = self._rubin_sky_wcs.pixelToSkyArray(_x, _y, degree=False)
+        ra, dec = self.wcs.pixelToSkyArray(_x, _y, degree=False)
 
         if np.ndim(x) == np.ndim(y) and np.ndim(y) == 0:
             return ra[0], dec[0]
@@ -73,7 +78,7 @@ class RubinSkyWCS(CelestialWCS):
 
         _ra = np.atleast_1d(ra)
         _dec = np.atleast_1d(dec)
-        x, y = self._rubin_sky_wcs.skyToPixelArray(_ra, _dec, degrees=False)
+        x, y = self.wcs.skyToPixelArray(_ra, _dec, degrees=False)
 
         # the output x, y are in Rubin conventions so we add 1 to get to
         # FITS conventions
@@ -92,7 +97,7 @@ class RubinSkyWCS(CelestialWCS):
 
     def _newOrigin(self, origin):
         return RubinSkyWCS(
-            self._rubin_sky_wcs.copyAtShiftedPixelOrigin(lsst.geom.Extent2D(0)),
+            self.wcs.copyAtShiftedPixelOrigin(lsst.geom.Extent2D(0)),
             origin=origin,
         )
 
@@ -105,7 +110,7 @@ class RubinSkyWCS(CelestialWCS):
                 and
                 # same as stack C++
                 # xref: https://github.com/lsst/afw/blob/main/src/geom/SkyWcs.cc#L156
-                self._rubin_sky_wcs_str == other._rubin_sky_wcs_str
+                self.wcs_str == other.wcs_str
                 and
                 self.origin == other.origin
             )
@@ -113,11 +118,10 @@ class RubinSkyWCS(CelestialWCS):
 
     def __repr__(self):
         return (
-            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r), "
-            "origin=%r)"
-        ) % (
-            self._rubin_sky_wcs_str,
-            self.origin,
+            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r), origin=%r)" % (
+                self.wcs_str,
+                self.origin,
+            )
         )
 
     def __hash__(self):
@@ -125,9 +129,9 @@ class RubinSkyWCS(CelestialWCS):
 
     def __getstate__(self):
         d = self.__dict__.copy()
-        del d["_rubin_sky_wcs"]
+        del d["_wcs"]
         return d
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self._rubin_sky_wcs = lsst.afw.geom.SkyWcs.readString(self._rubin_sky_wcs_str)
+        self._wcs = lsst.afw.geom.SkyWcs.readString(self._wcs_str)
