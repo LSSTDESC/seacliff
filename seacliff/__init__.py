@@ -4,7 +4,9 @@ except ImportError:
     from importlib_metadata import version, PackageNotFoundError
 
 try:
-    __version__ = version("pizza_cutter")
+    __version__ = version("seacliff")
 except PackageNotFoundError:
     # package is not installed
     pass
+
+from .rubin_sky_wcs import RubinSkyWCS  # noqa

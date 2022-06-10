@@ -59,7 +59,7 @@ class RubinSkyWCS(CelestialWCS):
         # see https://github.com/lsst/afw/blob/main/include/lsst/afw/geom/SkyWcs.h#L92
         _x = np.atleast_1d(x) - 1
         _y = np.atleast_1d(y) - 1
-        ra, dec = self.wcs.pixelToSkyArray(_x, _y, degree=False)
+        ra, dec = self.wcs.pixelToSkyArray(_x, _y, degrees=False)
 
         if np.ndim(x) == np.ndim(y) and np.ndim(y) == 0:
             return ra[0], dec[0]
