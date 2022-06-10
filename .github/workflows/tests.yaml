@@ -23,24 +23,30 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
-      - name: configure conda and install code
+      - name: install dev tools and code
         shell: bash -l {0}
         run: |
           conda config --set always_yes yes
-          mamba install \
-            --file=requirements.txt
           python -m pip install -e .
           mamba install -y -q \
             flake8 \
             pytest \
-            pytest-xdist
+            pytest-xdist \
+            black
 
       - name: lint
         shell: bash -l {0}
         run: |
           flake8 seacliff
+          black --check seacliff
 
-      - name: test
+      - name: install rubin science pipelines
+        shell: bash -l {0}
+        run: |
+          mamba install \
+            --file=requirements.txt
+
+      - name: run tests
         shell: bash -l {0}
         run: |
           pytest -n 2 -vv seacliff
