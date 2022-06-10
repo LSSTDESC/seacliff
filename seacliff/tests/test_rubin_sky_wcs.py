@@ -15,19 +15,17 @@ def _make_wcs(seed):
         rng.randint(low=100, high=200),
     )
     scale = rng.uniform(low=0.18, high=0.22)
-    theta = rng.uniform(low=0, high=2.0*np.pi)
-    cd_matrix = np.array([
-        [scale, 0.0],
-        [0.0, scale]],
+    theta = rng.uniform(low=0, high=2.0 * np.pi)
+    cd_matrix = np.array(
+        [[scale, 0.0], [0.0, scale]],
     )
     costheta = np.cos(theta)
     sintheta = np.sin(theta)
-    rotmat = np.array([
-        [costheta, -sintheta],
-        [sintheta, costheta]],
+    rotmat = np.array(
+        [[costheta, -sintheta], [sintheta, costheta]],
     )
     cd_matrix = np.dot(cd_matrix, rotmat)
-    ra = rng.uniform(low=0, high=2.0*np.pi)
+    ra = rng.uniform(low=0, high=2.0 * np.pi)
     dec = np.arcsin(rng.uniform(-1, 1))
     crval = lsst.geom.SpherePoint(ra, dec, lsst.geom.radians)
     return lsst.afw.geom.makeSkyWcs(

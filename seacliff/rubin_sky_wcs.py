@@ -21,6 +21,7 @@ class RubinSkyWCS(CelestialWCS):
         If not None, the origin position of the image coordinate system. Note that
         the conversion from 1-based to 0-based pixel indexing is **always** done.
     """
+
     _req_params = {"wcs": lsst.afw.geom.SkyWcs}
     _opt_params = {"origin": galsim.PositionD}
 
@@ -50,9 +51,8 @@ class RubinSkyWCS(CelestialWCS):
         if np.ndim(x) != np.ndim(y) or np.shape(x) != np.shape(y):
             raise RuntimeError(
                 "x and y must have the same dimension and shape when converting to "
-                "ra,dec in RubinSkyWCS! x dim/shape = %s/%s y dim/shape = %s/%s" % (
-                    np.dim(x), np.shape(x), np.dim(y), np.shape(y)
-                )
+                "ra,dec in RubinSkyWCS! x dim/shape = %s/%s y dim/shape = %s/%s"
+                % (np.dim(x), np.shape(x), np.dim(y), np.shape(y))
             )
         # the input x, y are in FITS conventions so we subtract 1 to get to
         # LSST conventions
@@ -71,9 +71,7 @@ class RubinSkyWCS(CelestialWCS):
             raise RuntimeError(
                 "ra and dec must have the same dimension and shape when converting "
                 "to x,y in RubinSkyWCS! ra dim/shape = %s/%s dec dim/shape = "
-                "%s/%s" % (
-                    np.dim(ra), np.shape(ra), np.dim(dec), np.shape(dec)
-                )
+                "%s/%s" % (np.dim(ra), np.shape(ra), np.dim(dec), np.shape(dec))
             )
 
         _ra = np.atleast_1d(ra)
@@ -102,23 +100,19 @@ class RubinSkyWCS(CelestialWCS):
         )
 
     def __eq__(self, other):
-        return (
-            (self is other)
-            or
-            (
-                isinstance(other, RubinSkyWCS)
-                and
-                # same as stack C++
-                # xref: https://github.com/lsst/afw/blob/main/src/geom/SkyWcs.cc#L156
-                self.wcs_str == other.wcs_str
-                and
-                self.origin == other.origin
-            )
+        return (self is other) or (
+            isinstance(other, RubinSkyWCS)
+            and
+            # same as stack C++
+            # xref: https://github.com/lsst/afw/blob/main/src/geom/SkyWcs.cc#L156
+            self.wcs_str == other.wcs_str
+            and self.origin == other.origin
         )
 
     def __repr__(self):
         return (
-            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r), origin=%r)" % (
+            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r), origin=%r)"
+            % (
                 self.wcs_str,
                 self.origin,
             )
