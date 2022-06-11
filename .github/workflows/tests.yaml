@@ -50,7 +50,7 @@ jobs:
       - name: run tests
         shell: bash -l {0}
         run: |
-          pytest -n 2 -vv --cov=seacliff --cov-report term-missing seacliff
+          pytest -n 2 -vv --cov=seacliff --cov-report=term-missing --cov-report=xml seacliff
 
       - name: upload coverage
         uses: codecov/codecov-action@v2
