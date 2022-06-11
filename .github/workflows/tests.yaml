@@ -32,6 +32,7 @@ jobs:
             flake8 \
             pytest \
             pytest-xdist \
+            pytest-cov \
             black
 
       - name: lint
@@ -49,4 +50,4 @@ jobs:
       - name: run tests
         shell: bash -l {0}
         run: |
-          pytest -n 2 -vv seacliff
+          pytest -n 2 -vv --cov=seacliff --cov-report term-missing seacliff
