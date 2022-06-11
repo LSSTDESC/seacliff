@@ -51,3 +51,6 @@ jobs:
         shell: bash -l {0}
         run: |
           pytest -n 2 -vv --cov=seacliff --cov-report term-missing seacliff
+
+      - name: upload coverage
+        uses: codecov/codecov-action@v2
