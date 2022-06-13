@@ -1,3 +1,6 @@
+import pickle
+import io
+
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -35,33 +38,62 @@ def _make_wcs(seed):
     )
 
 
-def _test_pos(wcs1, wcs2):
+def _test_pos(wcs1, wcs2, shift=None):
+    if shift is not None:
+        dx = shift.x
+        dy = shift.y
+    else:
+        dx = 0
+        dy = 0
     ra1, dec1 = wcs1.xyToradec(
         np.array([10, 9]),
         np.array([78, 55]),
         units=galsim.degrees,
     )
     ra2, dec2 = wcs2.xyToradec(
-        np.array([10, 9]),
-        np.array([78, 55]),
+        np.array([10, 9]) + dx,
+        np.array([78, 55]) + dy,
         units=galsim.degrees,
     )
     assert_allclose(ra1, ra2)
     assert_allclose(dec1, dec2)
 
-    x1, y1 = wcs1.xyToradec(ra1, dec1, units=galsim.degrees)
-    x2, y2 = wcs2.xyToradec(ra2, dec2, units=galsim.degrees)
-    assert_allclose(x1, x2)
-    assert_allclose(y1, y2)
+    x1, y1 = wcs1.radecToxy(ra1, dec1, units=galsim.degrees)
+    x2, y2 = wcs2.radecToxy(ra2, dec2, units=galsim.degrees)
+    assert_allclose(x1, x2 - dx)
+    assert_allclose(y1, y2 - dy)
+
+    assert_allclose(x1, np.array([10, 9]))
+    assert_allclose(y1, np.array([78, 55]))
+
+
+def test_rubin_sky_wcs_correct():
+    x0 = 10
+    y0 = 2
+    x = np.array([10.0, 9.0])
+    y = np.array([78.0, 55.0])
+
+    wcs = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(x0, y0))
+    ra, dec = wcs.xyToradec(x, y, units=galsim.degrees)
+
+    ra_rubin, dec_rubin = wcs.wcs.pixelToSkyArray(x - x0 - 1, y - y0 - 1, degrees=True)
+    assert_allclose(ra, ra_rubin)
+    assert_allclose(dec, dec_rubin)
+
+    x1, y1 = wcs.radecToxy(ra, dec, units=galsim.degrees)
+    assert_allclose(x, x1)
+    assert_allclose(y, y1)
 
 
 def test_rubin_sky_wcs_equal():
     wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
     assert wcs1 == wcs1
+    _test_pos(wcs1, wcs1)
 
     wcs2 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
     assert wcs1 == wcs2
     assert wcs2 is not wcs1
+    _test_pos(wcs1, wcs2)
 
     wcs3 = seacliff.RubinSkyWCS(_make_wcs(10))
     assert wcs3 == wcs3
@@ -91,5 +123,25 @@ def test_rubin_sky_wcs_copy():
     wcs6 = wcs1.copy()
     assert wcs6 == wcs1
     assert wcs6 is not wcs1
+    assert wcs1.wcs is not wcs6.wcs
 
     _test_pos(wcs1, wcs6)
+
+
+def test_rubin_sky_wcs_pickles():
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    b = io.BytesIO()
+    pickle.dump(wcs1, b)
+    b.seek(0)
+    wcs2 = pickle.load(b)
+    _test_pos(wcs1, wcs2)
+
+
+def test_rubin_sky_wcs_origin():
+    dx = 3
+    dy = -2
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs2 = wcs1.shiftOrigin(galsim.PositionD(dx, dy))
+    _test_pos(wcs1, wcs2, shift=galsim.PositionD(dx, dy))
+
+    assert wcs1.wcs is not wcs2.wcs

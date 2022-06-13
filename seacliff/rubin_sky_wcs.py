@@ -22,6 +22,7 @@ class RubinSkyWCS(CelestialWCS):
         the conversion from 1-based to 0-based pixel indexing is **always** done.
     """
 
+    # TODO: write a builder function for the config parser and settle on final API
     _req_params = {"wcs": lsst.afw.geom.SkyWcs}
     _opt_params = {"origin": galsim.PositionD}
 
