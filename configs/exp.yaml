@@ -3,13 +3,39 @@ modules:
   - galsim_extra
 
 image:
-  type: RubinCalexp
+  type: RubinCalexp  # TODO
+  random_seed: 4734138  # this seed sets the seed for everything above
 
   nobjects:
     type: MixedNObjects
     ngalaxies:
         type: RandomPoisson
         mean: 1000
+
+psf:
+  type: RubinPSF  # TODO
+
+gal:
+  type: Exponential
+  half_light_radius: 0.5
+  flux: '$10**(0.4*(30-18))'
+
+star:
+  type: Gaussian
+  sigma: 1.e-6
+  flux: '$10**(0.4*(30 - 10))'
+
+stamp:
+  type: MixedScene
+  objects:
+      # these are fractions of each kind of object
+      star: 0.2
+      gal: 0.8
+  draw_method: auto
+  shear:
+    type: G1G2
+    g1: 0.02
+    g2: 0.00
 
   world_pos:
     type: RADec
@@ -25,43 +51,12 @@ image:
         x_min: "$numpy.radians(dec_min_deg)"
         x_max: "$numpy.radians(dec_max_deg)"
 
-psf:
-  type: RubinPSF
-
-gal:
-  type: Exponential
-  half_light_radius: 0.5
-  flux:
-    type: Eval
-    str: "10**(0.4*(30-mag))"
-    fmag: 18
-
-star:
-  type: Gaussian
-  sigma: 1.e-6
-  flux:
-    type: Eval
-    str: "10**(0.4*(30 - mag))"
-    fmag: 10
-
-stamp:
-  type: MixedScene
-  objects:
-      star: 0.2
-      gal: 0.8
-  draw_method: auto
-  shear:
-    type: G1G2
-    g1: 0.02
-    g2: 0.00
-
 output:
-  type: RubinTract
-  random_seed: 4734138  # this seed sets the seed for everything above
+  type: RubinTract  # TODO
   nproc: 32
   butler: /path/to/postgres/repo/or/whatever
   input_butler_info:
-    band: r 
+    band: r
     # IDK whagt to do with these guys yet
     tract: ID_OF_TRACT
     # optional to simulate stuff for only one patch

@@ -2,7 +2,6 @@ import numpy as np
 
 import lsst.geom
 import lsst.afw.geom
-import galsim
 from galsim.wcs import CelestialWCS
 
 
@@ -21,10 +20,6 @@ class RubinSkyWCS(CelestialWCS):
         If not None, the origin position of the image coordinate system. Note that
         the conversion from 1-based to 0-based pixel indexing is **always** done.
     """
-
-    # TODO: write a builder function for the config parser and settle on final API
-    _req_params = {"wcs": lsst.afw.geom.SkyWcs}
-    _opt_params = {"origin": galsim.PositionD}
 
     def __init__(self, wcs, origin=None):
         self._wcs = wcs
@@ -53,7 +48,7 @@ class RubinSkyWCS(CelestialWCS):
             raise RuntimeError(
                 "x and y must have the same dimension and shape when converting to "
                 "ra,dec in RubinSkyWCS! x dim/shape = %s/%s y dim/shape = %s/%s"
-                % (np.dim(x), np.shape(x), np.dim(y), np.shape(y))
+                % (np.ndim(x), np.shape(x), np.ndim(y), np.shape(y))
             )
         # the input x, y are in FITS conventions so we subtract 1 to get to
         # LSST conventions
@@ -72,7 +67,7 @@ class RubinSkyWCS(CelestialWCS):
             raise RuntimeError(
                 "ra and dec must have the same dimension and shape when converting "
                 "to x,y in RubinSkyWCS! ra dim/shape = %s/%s dec dim/shape = "
-                "%s/%s" % (np.dim(ra), np.shape(ra), np.dim(dec), np.shape(dec))
+                "%s/%s" % (np.ndim(ra), np.shape(ra), np.ndim(dec), np.shape(dec))
             )
 
         _ra = np.atleast_1d(ra)
@@ -130,3 +125,9 @@ class RubinSkyWCS(CelestialWCS):
     def __setstate__(self, d):
         self.__dict__ = d
         self._wcs = lsst.afw.geom.SkyWcs.readString(self._wcs_str)
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy()

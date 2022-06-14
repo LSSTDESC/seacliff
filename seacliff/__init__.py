@@ -1,3 +1,5 @@
+# this bloack ensures this code works for python < 3.8 where importlib.metadata is
+# not in the stdlib
 try:
     from importlib.metadata import version, PackageNotFoundError
 except ImportError:

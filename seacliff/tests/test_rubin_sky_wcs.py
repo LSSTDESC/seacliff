@@ -1,14 +1,15 @@
-import pickle
-import io
-
 import numpy as np
 from numpy.testing import assert_allclose
+import pytest
 
 import galsim
 import lsst.geom
-
-
 import seacliff
+from seacliff.testing import check_pickle_eval_repr_copy
+
+
+XTEST = np.array([10.0, 9.0])
+YTEST = np.array([78.0, 55.0])
 
 
 def _make_wcs(seed):
@@ -46,13 +47,13 @@ def _test_pos(wcs1, wcs2, shift=None):
         dx = 0
         dy = 0
     ra1, dec1 = wcs1.xyToradec(
-        np.array([10, 9]),
-        np.array([78, 55]),
+        XTEST,
+        YTEST,
         units=galsim.degrees,
     )
     ra2, dec2 = wcs2.xyToradec(
-        np.array([10, 9]) + dx,
-        np.array([78, 55]) + dy,
+        XTEST + dx,
+        YTEST + dy,
         units=galsim.degrees,
     )
     assert_allclose(ra1, ra2)
@@ -63,26 +64,38 @@ def _test_pos(wcs1, wcs2, shift=None):
     assert_allclose(x1, x2 - dx)
     assert_allclose(y1, y2 - dy)
 
-    assert_allclose(x1, np.array([10, 9]))
-    assert_allclose(y1, np.array([78, 55]))
+    assert_allclose(x1, XTEST)
+    assert_allclose(y1, YTEST)
 
 
-def test_rubin_sky_wcs_correct():
+@pytest.mark.parametrize("x,y", [(XTEST, YTEST), (XTEST[0], YTEST[0])])
+def test_rubin_sky_wcs_correct(x, y):
     x0 = 10
     y0 = 2
-    x = np.array([10.0, 9.0])
-    y = np.array([78.0, 55.0])
 
     wcs = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(x0, y0))
     ra, dec = wcs.xyToradec(x, y, units=galsim.degrees)
 
-    ra_rubin, dec_rubin = wcs.wcs.pixelToSkyArray(x - x0 - 1, y - y0 - 1, degrees=True)
+    ra_rubin, dec_rubin = wcs.wcs.pixelToSkyArray(
+        np.atleast_1d(x - x0 - 1),
+        np.atleast_1d(y - y0 - 1),
+        degrees=True,
+    )
     assert_allclose(ra, ra_rubin)
     assert_allclose(dec, dec_rubin)
 
     x1, y1 = wcs.radecToxy(ra, dec, units=galsim.degrees)
     assert_allclose(x, x1)
     assert_allclose(y, y1)
+
+
+def test_rubin_sky_wcs_raises():
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    with pytest.raises(RuntimeError):
+        wcs1.xyToradec(np.array([10]), np.array([10, 10]), units=galsim.degrees)
+
+    with pytest.raises(RuntimeError):
+        wcs1.radecToxy(np.array([10]), np.array([10, 10]), units=galsim.degrees)
 
 
 def test_rubin_sky_wcs_equal():
@@ -109,16 +122,7 @@ def test_rubin_sky_wcs_equal():
     assert wcs4 is not wcs1
 
 
-def test_rubin_sky_wcs_eval_repr():
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
-    wcs5 = eval(repr(wcs1))
-    assert wcs5 == wcs1
-    assert wcs5 is not wcs1
-
-    _test_pos(wcs1, wcs5)
-
-
-def test_rubin_sky_wcs_copy():
+def test_rubin_sky_wcs_pickle_eval_repr_copy():
     wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
     wcs6 = wcs1.copy()
     assert wcs6 == wcs1
@@ -126,15 +130,7 @@ def test_rubin_sky_wcs_copy():
     assert wcs1.wcs is not wcs6.wcs
 
     _test_pos(wcs1, wcs6)
-
-
-def test_rubin_sky_wcs_pickles():
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
-    b = io.BytesIO()
-    pickle.dump(wcs1, b)
-    b.seek(0)
-    wcs2 = pickle.load(b)
-    _test_pos(wcs1, wcs2)
+    check_pickle_eval_repr_copy(wcs1, extra_tests=_test_pos)
 
 
 def test_rubin_sky_wcs_origin():
