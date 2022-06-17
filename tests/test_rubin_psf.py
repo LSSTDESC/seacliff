@@ -137,8 +137,6 @@ def test_rubin_psf_color_does_nothing():
 
 
 def test_rubin_psf_center():
-    # As of writing (2022-06-17), the Rubin PSF model does not have color. Thus
-    # this keyword arg should do nothing. -- MRB
     pth = os.path.join(os.path.dirname(__file__), "data", "rubin_psf.fits")
     rpsf = lsst.afw.detection.Psf.readFits(pth)
     gpsf = seacliff.RubinPSF(rpsf, galsim.PixelScale(0.2))
