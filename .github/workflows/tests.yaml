@@ -41,6 +41,12 @@ jobs:
           flake8 seacliff
           black --check seacliff
 
+      - name: lint tests
+        shell: bash -l {0}
+        run: |
+          flake8 tests
+          black --check tests
+
       - name: install rubin science pipelines
         shell: bash -l {0}
         run: |
