@@ -24,6 +24,7 @@ class RubinPSF(object):
     wcs : galsim.BaseWCS or a subclass thereof
         The WCS class used to map the PSF pixels to world coordinates.
     """
+
     def __init__(self, psf, wcs):
         if isinstance(psf, str):
             self._psf = lsst.afw.detection.Psf.readFits(psf)
@@ -142,17 +143,13 @@ class RubinPSF(object):
             and
             # test if their fits representations are the same
             self.psf_bytes == other.psf_bytes
-            and
-            self.wcs == other.wcs
+            and self.wcs == other.wcs
         )
 
     def __repr__(self):
-        return (
-            "seacliff.RubinPSF(%r, %r)"
-            % (
-                self.psf_bytes,
-                self.wcs,
-            )
+        return "seacliff.RubinPSF(%r, %r)" % (
+            self.psf_bytes,
+            self.wcs,
         )
 
     def __hash__(self):
