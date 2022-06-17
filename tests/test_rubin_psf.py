@@ -4,13 +4,16 @@ import copy
 import pytest
 
 import galsim
-import seacliff
+import galsim.hsm
 import lsst.afw.detection
 import lsst.geom
-import galsim.hsm
-
+from lsst.meas.algorithms import KernelPsf
+from lsst.afw.math import FixedKernel
+import lsst.afw.image
 from numpy.testing import assert_allclose
+import numpy as np
 
+import seacliff
 from seacliff.testing import check_pickle_eval_repr_copy
 
 
@@ -57,6 +60,11 @@ def test_rubin_psf_equal():
     assert gpsf1 == gpsf4
     assert gpsf1.psf is not gpsf4.psf
     assert gpsf1.wcs is not gpsf4.wcs
+
+    kpsf_arr = np.random.RandomState(seed=10).normal(size=(43, 43))
+    kpsf = KernelPsf(FixedKernel(lsst.afw.image.ImageD(kpsf_arr)))
+    gpsf5 = seacliff.RubinPSF(kpsf, galsim.PixelScale(0.2))
+    assert gpsf5 != gpsf1
 
 
 def test_rubin_psf_correct():
