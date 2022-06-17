@@ -38,7 +38,7 @@ class RubinPSF(object):
 
         # doing this just in case someone decides to pass in a WCS from Rubin here
         if not isinstance(wcs, galsim.BaseWCS):
-            raise RuntimeError("The WCS class passed to RubinPSF must be from galsim!")
+            raise ValueError("The WCS class passed to RubinPSF must be from galsim!")
 
         self._wcs = wcs
 
@@ -110,12 +110,15 @@ class RubinPSF(object):
 
         # python will throw an error if the user duplicates any of the keywords in
         # kwargs - that's what we want since we want to set some of these ourselves
-        im = galsim.InterpolateImage(
+        im = galsim.InterpolatedImage(
             galsim.ImageD(rubin_im.array / rubin_im.array.sum()),
             wcs=jac,
             offset=(offset_x, offset_y),
             gsparams=gsparams,
-            use_true_center=True,  # we need this for the math above for the offset
+            # we need this for the math above for the offset
+            # this is the galsim default but we give it here so it does not get changed
+            # by the user
+            use_true_center=True,
             **kwargs,
         )
         return im
