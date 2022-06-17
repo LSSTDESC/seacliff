@@ -85,7 +85,7 @@ class RubinPSF(object):
         Returns
         -------
         im : galsim.InterpolateImage
-            An InterpolateImage with the PSF profile.
+            An InterpolatedImage with the PSF profile.
         """
         rubin_pos = lsst.geom.Point2D(image_pos.x - 1, image_pos.y - 1)
         if color is not None:
