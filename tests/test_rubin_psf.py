@@ -7,6 +7,7 @@ import galsim
 import seacliff
 import lsst.afw.detection
 import lsst.geom
+import galsim.hsm
 
 from numpy.testing import assert_allclose
 
@@ -132,3 +133,41 @@ def test_rubin_psf_color_does_nothing():
     psf2 = gpsf.getPSF(image_pos, color=10)
 
     assert psf1 == psf2
+
+
+def test_rubin_psf_center():
+    # As of writing (2022-06-17), the Rubin PSF model does not have color. Thus
+    # this keyword arg should do nothing. -- MRB
+    pth = os.path.join(os.path.dirname(__file__), "data", "rubin_psf.fits")
+    rpsf = lsst.afw.detection.Psf.readFits(pth)
+    gpsf = seacliff.RubinPSF(rpsf, galsim.PixelScale(0.2))
+
+    # pixel center everywhere
+    x = 450
+    y = 471
+    image_pos = galsim.PositionD(x, y)
+    psf1 = gpsf.getPSF(image_pos)
+    psf_im = psf1.drawImage(nx=53, ny=43, scale=0.2)
+    mom = galsim.hsm.FindAdaptiveMom(psf_im)
+    assert_allclose(mom.moments_centroid.x, 27, atol=5e-3)
+    assert_allclose(mom.moments_centroid.y, 22, atol=5e-3)
+
+    # slightly off the pixel center
+    x = 450.1
+    y = 471.3
+    image_pos = galsim.PositionD(x, y)
+    psf1 = gpsf.getPSF(image_pos)
+    psf_im = psf1.drawImage(nx=53, ny=43, scale=0.2, offset=(0.1, 0.3))
+    mom = galsim.hsm.FindAdaptiveMom(psf_im)
+    assert_allclose(mom.moments_centroid.x, 27.1, atol=5e-3)
+    assert_allclose(mom.moments_centroid.y, 22.3, atol=5e-3)
+
+    # make sure we recenter ok
+    x = 450.1
+    y = 471.3
+    image_pos = galsim.PositionD(x, y)
+    psf1 = gpsf.getPSF(image_pos)
+    psf_im = psf1.drawImage(nx=53, ny=43, scale=0.2)
+    mom = galsim.hsm.FindAdaptiveMom(psf_im)
+    assert_allclose(mom.moments_centroid.x, 27, atol=5e-3)
+    assert_allclose(mom.moments_centroid.y, 22, atol=5e-3)
