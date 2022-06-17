@@ -114,7 +114,8 @@ def test_rubin_psf_correct():
         offset=(1, 3),
     )
     assert_allclose(
-        dpsf.array[3:, 1:], rpsf_im.array[:-3, :-1] / rpsf_im.array.sum(),
+        dpsf.array[3:, 1:],
+        rpsf_im.array[:-3, :-1] / rpsf_im.array.sum(),
         rtol=5e-7,
     )
 
