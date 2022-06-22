@@ -77,7 +77,7 @@ class RubinPSF(object):
             An optional galsim parameter class for controlling the returned
             InterpolateImage.
         **kwargs : extra keywords, optional
-            All extra keyword arguments are passed to the galsim.InterpolateImage
+            All extra keyword arguments are passed to the galsim.InterpolatedImage
             returned by this method. The `offset`, `gsparams`, `wcs`, and
             `use_true_center` keywords are set internally. Passing these will cause
             an error to be raised.
