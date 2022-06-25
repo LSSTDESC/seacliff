@@ -52,9 +52,7 @@ def get_rubin_skyvar_and_gain(calexp):
         for amp_bbox in amp_bboxes:
             amp_im_arr = calexp.image[amp_bbox].array
             amp_var_arr = calexp.variance[amp_bbox].array
-            good = (
-                np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
-            )
+            good = np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
             fit = np.polyfit(amp_im_arr[good], amp_var_arr[good], deg=1)
             gain = 1.0 / fit[0]
             skyvar[amp_bbox].array[good] -= amp_im_arr[good] / gain
@@ -65,9 +63,7 @@ def get_rubin_skyvar_and_gain(calexp):
         for amp_bbox, gain in zip(amp_bboxes, gains):
             amp_im_arr = calexp.image[amp_bbox].array
             amp_var_arr = calexp.variance[amp_bbox].array
-            good = (
-                np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
-            )
+            good = np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
             skyvar[amp_bbox].array[good] -= amp_im_arr[good] / gain
             gn[amp_bbox].array[:, :] = gain
 

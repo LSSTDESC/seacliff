@@ -12,13 +12,10 @@ def test_rubin_noise_fit_whole_image():
     n = 101
     gain = 1.4
 
-    gim = galsim.Gaussian(
-        fwhm=0.8
-    ).withFlux(
-        10
-    ).drawImage(
-        nx=n, ny=n, scale=0.2
-    ).array * gain
+    gim = (
+        galsim.Gaussian(fwhm=0.8).withFlux(10).drawImage(nx=n, ny=n, scale=0.2).array
+        * gain
+    )
 
     bkg = gim.max() * 100
     tot = gim + bkg
