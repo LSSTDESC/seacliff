@@ -6,7 +6,9 @@ def get_rubin_skyvar_and_gain(calexp):
 
     The algorithm here follows the PR
     https://github.com/lsst/meas_algorithms/pull/265/files which is based on code in
-    Piff originally AFAIK.
+    Piff originally AFAIK. We also use the gains as reported by the code if possible
+    following
+    https://github.com/esheldon/metadetect/blob/master/metadetect/lsst/util.py#L239
 
     Parameters
     ----------
