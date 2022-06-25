@@ -47,26 +47,26 @@ def get_rubin_skyvar_and_gain(calexp):
         # we use the estimate of the sky from the image-variance subtracted variance
         # plane
         # (e.g., raw var - im / gain) as opposed to the intercept of the fit.
-        skyvar = calexp.variance_plane.clone()
-        gn = calexp.variance_plane.clone()
+        skyvar = calexp.variance.clone()
+        gn = calexp.variance.clone()
         for amp_bbox in amp_bboxes:
-            amp_im_arr = calexp[amp_bbox].image.array
-            amp_var_arr = calexp.variance_plane[amp_bbox].array
+            amp_im_arr = calexp.image[amp_bbox].array
+            amp_var_arr = calexp.variance[amp_bbox].array
             good = (
-                (amp_var_arr != 0) & np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
+                np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
             )
             fit = np.polyfit(amp_im_arr[good], amp_var_arr[good], deg=1)
             gain = 1.0 / fit[0]
             skyvar[amp_bbox].array[good] -= amp_im_arr[good] / gain
             gn[amp_bbox].array[:, :] = gain
     else:
-        skyvar = calexp.variance_plane.clone()
-        gn = calexp.variance_plane.clone()
+        skyvar = calexp.variance.clone()
+        gn = calexp.variance.clone()
         for amp_bbox, gain in zip(amp_bboxes, gains):
-            amp_im_arr = calexp[amp_bbox].image.array
-            amp_var_arr = calexp.variance_plane[amp_bbox].array
+            amp_im_arr = calexp.image[amp_bbox].array
+            amp_var_arr = calexp.variance[amp_bbox].array
             good = (
-                (amp_var_arr != 0) & np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
+                np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
             )
             skyvar[amp_bbox].array[good] -= amp_im_arr[good] / gain
             gn[amp_bbox].array[:, :] = gain
