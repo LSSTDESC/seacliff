@@ -45,10 +45,7 @@ def test_rubin_noise_with_gains_dc2():
 
     sv, gn = get_rubin_skyvar_and_gain(exp)
     assert_allclose(gn, gain)
-    # the bkg = sky counts / gain
-    # so we multiply by gain to counts and then divide by gain**2 to match
-    # units of image
-    # thus we are left with bkg / gain
+    # the bkg = sky counts but variance is sky counts / gain
     # we check for medians since some regions have huge counts due to artifacts,
     # saturation etc.
     assert_allclose(np.median(sv), np.median(bkg / gain), rtol=0.1, atol=0)
