@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from numpy.testing import assert_allclose
 
 import galsim
@@ -33,9 +34,11 @@ def test_rubin_noise_fit_whole_image():
 
 
 def test_rubin_noise_with_gains_dc2():
-    exp = lsst.afw.image.ExposureD.readFits("/Users/beckermr/Downloads/cexp.fits.fz")
+    exp = lsst.afw.image.ExposureD.readFits(
+        os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
+    )
     exp_bkg = lsst.afw.math.BackgroundList.readFits(
-        "/Users/beckermr/Downloads/cexp_bkg.fits"
+        os.path.join(os.path.dirname(__file__), "data", "cexp_bkg.fits")
     )
     bkg = exp_bkg.getImage().array
     gain = np.mean([amp.getGain() for amp in exp.getDetector().getAmplifiers()])
