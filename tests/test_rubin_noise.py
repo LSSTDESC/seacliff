@@ -52,3 +52,7 @@ def test_rubin_noise_with_gains_dc2():
     # we check for medians since some regions have huge counts due to artifacts,
     # saturation etc.
     assert_allclose(np.median(sv), np.median(bkg / gain), rtol=0.1, atol=0)
+
+    exp.setDetector(None)
+    sv, gn = get_rubin_skyvar_and_gain(exp)
+    assert_allclose(gn, gain, atol=2e-2, rtol=0)

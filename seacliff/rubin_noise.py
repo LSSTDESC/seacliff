@@ -13,15 +13,14 @@ def get_rubin_skyvar_and_gain(calexp):
     Parameters
     ----------
     calexp : lsst.afw.image.Exposure
-        The background-subtacted calexp.
+        The background-subtacted calexp in ADU.
 
     Returns
     -------
     skyvar : np.ndarray
-        The sky variance in units of <something in pixel counts>/gain**2.
+        The sky variance in units of ADU^2.
     gain : np.ndarray
-        The map of gains that converts counts to calexp units
-        `<calexp units> = <something in pixel counts>/gain`.
+        The gain in e-/AUD.
     """
     try:
         amps = calexp.getDetector().getAmplifiers()
@@ -38,15 +37,23 @@ def get_rubin_skyvar_and_gain(calexp):
     if gains is None or len(gains) != len(amp_bboxes):
         # the gains do not match or are not there so we have to fit for it
         # the fit here is
-        #   var = m * im + b
+        #   <var in ADU> = m * <im in ADU> + b
         # the total variance in the image is Poisson noise for objects + sky
-        # this variance is scaled by the gain to match the image scaling
-        # to get (objects + sky) / gain**2
-        # the image is background subtracted and scaled so im = objects / gain
-        # thus the slope is m = 1/gain and the intercept has to be b = sky / gain**2
-        # we use the estimate of the sky from the image-variance subtracted variance
-        # plane
-        # (e.g., raw var - im / gain) as opposed to the intercept of the fit.
+        # in electrons. This quantity is
+        #   var for image in e- = (objects + sky) * gain
+        # The objects in electrons are
+        #   image in e- = objects * gain
+        # Thus to get back to ADU, we scale the image by 1/gain and the variance by
+        # 1/gain**2.
+        # This gives us
+        #  var in ADU = (objects + sky) / gain
+        #  image in ADU = objects
+        # Thus for the slope and intercept we have
+        #  m = 1/gain
+        #  b = sky / gain
+        # Finally to get the sky variance we use the image itself and not the fitted sky
+        # b:
+        #   var - im / gain
         skyvar = calexp.variance.clone()
         gn = calexp.variance.clone()
         for amp_bbox in amp_bboxes:
