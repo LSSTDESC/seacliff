@@ -41,6 +41,12 @@ jobs:
           flake8 seacliff
           black --check seacliff
 
+      - name: lint tests
+        shell: bash -l {0}
+        run: |
+          flake8 tests
+          black --check tests
+
       - name: install rubin science pipelines
         shell: bash -l {0}
         run: |
@@ -50,7 +56,7 @@ jobs:
       - name: run tests
         shell: bash -l {0}
         run: |
-          pytest -n 2 -vv --cov=seacliff --cov-report=term-missing --cov-report=xml seacliff
+          pytest -n 2 -vv --cov=seacliff --cov-report=term-missing --cov-report=xml tests
 
       - name: upload coverage
         uses: codecov/codecov-action@v2
