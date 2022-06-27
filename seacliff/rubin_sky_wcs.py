@@ -15,7 +15,8 @@ class RubinSkyWCS(CelestialWCS):
     Parameters
     ----------
     wcs : lsst.afw.geom.SkyWcs
-        The Rubin Sky WCS to be wrapped by this class.
+        The Rubin Sky WCS to be wrapped by this class. Usually one can get this from the
+        `.getWcs()` method attached to a calexp.
     origin : PositionD or PositionI or None, optional
         If not None, the origin position of the image coordinate system. Note that
         the conversion from 1-based to 0-based pixel indexing is **always** done.

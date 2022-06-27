@@ -12,3 +12,4 @@ except PackageNotFoundError:
     pass
 
 from .rubin_sky_wcs import RubinSkyWCS  # noqa
+from .rubin_psf import RubinPSF  # noqa
