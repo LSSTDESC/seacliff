@@ -192,6 +192,11 @@ class RubinNoise(BaseNoise):
         return self._gn
 
     def _applyTo(self, image):
+        if image.bounds != self.sky_level.bounds or image.bounds != self.gain.bounds:
+            raise RuntimeError(
+                "The image must have the same pixel bounds as the sky level and gain!"
+            )
+
         # the noise array is in ADU
         noise_array = np.empty(np.prod(image.array.shape), dtype=float)
         noise_array[:] = image.array.flatten()

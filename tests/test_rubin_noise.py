@@ -4,6 +4,8 @@ from numpy.testing import assert_allclose
 
 import galsim
 
+import pytest
+
 from seacliff.testing import check_pickle_eval_repr_copy
 from seacliff.rubin_noise import get_rubin_skyvar_and_gain, RubinNoise
 import lsst.afw.image
@@ -160,11 +162,16 @@ def test_rubin_noise_galsim_mad_clipping():
 
 
 def test_rubin_noise_apply_image():
-    x, y = np.meshgrid(101, 101)
+    x, y = np.meshgrid(np.arange(101), np.arange(101))
     gain = galsim.ImageD(0.7 * (1 + y / 100 * 0.1))
     sv = galsim.ImageD(100 * (1 + x / 100 * 0.1))
 
     nse = RubinNoise(sv, gain=gain)
+
+    # do a basic check
+    im = galsim.Gaussian(fwhm=2.0).withFlux(1000).drawImage(scale=0.2, nx=10, ny=101)
+    with pytest.raises(RuntimeError):
+        im.addNoise(nse)
 
     # do a basic check
     im = galsim.Gaussian(fwhm=2.0).withFlux(1000).drawImage(scale=0.2, nx=101, ny=101)
@@ -189,6 +196,9 @@ def test_rubin_noise_apply_image():
 
     mn = np.mean(arrs, axis=0)
     assert_allclose(mn, im_orig.array, atol=1, rtol=0)
+
+    sd = np.std(arrs, axis=0)
+    assert_allclose(sd, np.sqrt(((im_orig + sv) / gain).array), atol=0, rtol=0.1)
 
     # check seeding
     nse1 = RubinNoise(sv, gain=gain, rng=galsim.BaseDeviate(10))
