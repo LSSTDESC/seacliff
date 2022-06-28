@@ -157,9 +157,9 @@ class RubinNoise(BaseNoise):
     rng : galsim.BaseDeviate
         The current `galsim.BaseDeviate` attached to this class.
     sky_level : galsim.Image or float.
-        An image of the sky level in ADU for the calexp.
+        The sky level in ADU for the calexp.
     gain : galsim.Image or float.
-        An image of the gain in e-/ADU for the calexp.
+        The gain in e-/ADU for the calexp.
     mad_clipping : float or None
         If not None, the level of MAD clipping applied to the sky level.
     """
