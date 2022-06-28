@@ -101,7 +101,7 @@ class RubinNoise(BaseNoise):
 
     where var is the total variance and im is the simulated image in ADU units.
 
-    You can instantiate this object in one of two ways.
+    You can instantiate this object in one of several ways.
 
         1) Feed it a Rubin calexp:
 
@@ -110,6 +110,10 @@ class RubinNoise(BaseNoise):
         2) Feed it a galsim image with the variance (sky level) and gain maps:
 
             >>> nse = seacliff.RubinNoise(var, gain=gain)
+
+        3) Feed it floats for the gain and/or sky level maps.
+
+            >>> nse = seacliff.RubinNoise(10, gain=3)
 
     In all cases the units for the sky level are ADUs and the gain has units e-/ADU.
 
@@ -135,17 +139,28 @@ class RubinNoise(BaseNoise):
 
     Parameters
     ----------
-    calexp_or_sky_level :
-    gain :
-    rng :
-    mad_clipping :
+    calexp_or_sky_level : lsst.afw.image.Exposure, galsim.Image, or float
+        A Rubin calexp from which to extract the sky level and gain, or an image
+        of the sky level in a Rubin calexp.
+    gain : galsim.Image, float, or None, optional
+        Only relevant if `calexp_or_sky_level` is a sky level.
+    rng : galsim.BaseDeviate or None, optional
+        An RNG instance to use for generating noise.
+    mad_clipping : float or None,
+        If given, the sky level will be clipped to be at most this many median
+        absolute deviations from the median sky level. Useful for truncating large
+        values in the sky level extracted from a calexp.
 
     Attributes
     ----------
-    rng :
-    sky_level :
-    gain :
-    mad_clipping :
+    rng : galsim.BaseDeviate
+        The current `galsim.BaseDeviate` attached to this class.
+    sky_level : galsim.Image or float.
+        An image of the sky level in ADU for the calexp.
+    gain : galsim.Image or float.
+        An image of the gain in e-/ADU for the calexp.
+    mad_clipping : float or None
+        If not None, the level of MAD clipping applied to the sky level.
     """
 
     def __init__(self, calexp_or_sky_level, gain=None, rng=None, mad_clipping=None):
@@ -153,28 +168,28 @@ class RubinNoise(BaseNoise):
         self._pd = PoissonDeviate(self.rng)
         self._mad_clipping = mad_clipping
 
-        if gain is not None:
-            # we got a sky variance and gain
-            self._gn = gain
-            sv = calexp_or_sky_level.array.copy()
-        else:
+        if gain is None:
             # we got a calexp
             sv, gn = get_rubin_skyvar_and_gain(calexp_or_sky_level)
             self._gn = galsim.ImageD(gn)
-
-        if self.mad_clipping is not None:
-            sd, mn = mad(sv, return_median=True)
-            msk = np.abs(sv - mn) > mad_clipping * sd
-            if np.any(msk):
-                sgn = np.sign(sv - mn)
-                sv[msk] = mn + sgn[msk] * mad_clipping * sd
-
-        if gain is not None:
-            _sv = calexp_or_sky_level.copy()
-            _sv.array[:, :] = sv
-            self._sv = _sv
         else:
+            # we got a sky variance and gain
+            self._gn = gain
+            if isinstance(calexp_or_sky_level, galsim.Image):
+                sv = calexp_or_sky_level.array.copy()
+            else:
+                sv = calexp_or_sky_level
+
+        if np.ndim(sv) > 0:
+            if self.mad_clipping is not None:
+                sd, mn = mad(sv, return_median=True)
+                msk = np.abs(sv - mn) > mad_clipping * sd
+                if np.any(msk):
+                    sgn = np.sign(sv - mn)
+                    sv[msk] = mn + sgn[msk] * mad_clipping * sd
             self._sv = galsim.ImageD(sv)
+        else:
+            self._sv = sv
 
     @property
     def mad_clipping(self):
@@ -192,7 +207,10 @@ class RubinNoise(BaseNoise):
         return self._gn
 
     def _applyTo(self, image):
-        if image.bounds != self.sky_level.bounds or image.bounds != self.gain.bounds:
+        if (
+            isinstance(self.sky_level, galsim.Image)
+            and image.bounds != self.sky_level.bounds
+        ) or (isinstance(self.gain, galsim.Image) and image.bounds != self.gain.bounds):
             raise RuntimeError(
                 "The image must have the same pixel bounds as the sky level and gain!"
             )
@@ -206,40 +224,62 @@ class RubinNoise(BaseNoise):
         # quite right if the sky has a fractional part.  So only subtract off the
         # integer part of the sky at the end. For float images, you get the same answer
         # either way, so it doesn't matter.
-        frac_sky = self.sky_level.array - image.dtype(self.sky_level.array)
-        int_sky = self.sky_level.array - frac_sky
+        if isinstance(self.sky_level, galsim.Image):
+            sv = self.sky_level.array.flatten()
+        else:
+            sv = self.sky_level
 
-        if np.any(self.sky_level.array != 0):
-            noise_array += self.sky_level.array.flatten()
+        frac_sky = sv - image.dtype(sv)
+        int_sky = sv - frac_sky
+
+        if np.any(sv != 0):
+            noise_array += sv
 
         # The noise_image now has the expectation values for each pixel with the sky
         # added but in ADU.
         # We convert to e-, make the random draw, then convert back.
-        noise_array *= self.gain.array.flatten()
+        if isinstance(self.gain, galsim.Image):
+            gn = self.gain.array.flatten()
+        else:
+            gn = self.gain
+
+        noise_array *= gn
         noise_array = noise_array.clip(0)  # Make sure no negative values
         self._pd.generate_from_expectation(noise_array)
-        noise_array /= self.gain.array.flatten()
+        noise_array /= gn
 
         # Subtract off the sky, since we don't want it in the final image.
         if np.any(frac_sky != 0):
-            noise_array -= frac_sky.flatten()
+            noise_array -= frac_sky
         # Noise array is now the correct value for each pixel.
         np.copyto(image.array, noise_array.reshape(image.array.shape), casting="unsafe")
         if np.any(int_sky != 0):
+            if np.ndim(int_sky) > 0:
+                int_sky = int_sky.reshape(image.array.shape)
             image -= int_sky
 
     def _getVariance(self):
         return self.sky_level / self.gain
 
     def _withVariance(self, variance):
-        if not isinstance(variance, galsim.Image):
-            _variance = self.sky_level.copy()
-            _variance.array[:, :] = variance
+        isarr = False
+
+        if isinstance(variance, galsim.Image):
+            _variance = variance.array
+            isarr = True
         else:
             _variance = variance
 
+        if isinstance(self.gain, galsim.Image):
+            _gain = self.gain.array
+            isarr = True
+        else:
+            _gain = self.gain
+
+        vg = _variance * _gain
+
         return RubinNoise(
-            _variance * self.gain,
+            galsim.ImageD(vg) if isarr else vg,
             gain=self.gain,
             rng=self.rng,
             mad_clipping=None,
@@ -262,7 +302,9 @@ class RubinNoise(BaseNoise):
 
         Parameters
         ----------
-        rng :
+        rng : galsim.BaseDeviate or None, optional
+            An RNG instance to use for generating noise for the copy. If not given,
+            the copy will share its RNG with the original object.
 
         Returns
         -------

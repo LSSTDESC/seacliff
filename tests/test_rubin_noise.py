@@ -139,6 +139,14 @@ def test_rubin_noise_galsim_scale_variance():
         nse.sky_level.array / nse.gain.array / 3,
     )
 
+    nse = RubinNoise(10, gain=4)
+    nse2 = nse.withVariance(nse.sky_level / nse.gain * 4)
+    assert_allclose(nse.gain, 4, atol=2e-2, rtol=0)
+    assert_allclose(
+        nse2.getVariance(),
+        4 * nse.sky_level / nse.gain,
+    )
+
 
 def test_rubin_noise_galsim_mad_clipping():
     exp = lsst.afw.image.ExposureD.readFits(
@@ -161,17 +169,29 @@ def test_rubin_noise_galsim_mad_clipping():
     assert frac1 < frac5
 
 
-def test_rubin_noise_apply_image():
+@pytest.mark.parametrize("sky_arr", [True, False])
+@pytest.mark.parametrize("gain_arr", [True, False])
+def test_rubin_noise_apply_image(gain_arr, sky_arr):
     x, y = np.meshgrid(np.arange(101), np.arange(101))
-    gain = galsim.ImageD(0.7 * (1 + y / 100 * 0.1))
-    sv = galsim.ImageD(100 * (1 + x / 100 * 0.1))
+    if gain_arr:
+        gain = galsim.ImageD(0.7 * (1 + y / 100 * 0.1))
+    else:
+        gain = 0.7
+
+    if sky_arr:
+        sv = galsim.ImageD(100 * (1 + x / 100 * 0.1))
+    else:
+        sv = 100
 
     nse = RubinNoise(sv, gain=gain)
 
-    # do a basic check
-    im = galsim.Gaussian(fwhm=2.0).withFlux(1000).drawImage(scale=0.2, nx=10, ny=101)
-    with pytest.raises(RuntimeError):
-        im.addNoise(nse)
+    # do a basic check for image sizes
+    if gain_arr or sky_arr:
+        im = (
+            galsim.Gaussian(fwhm=2.0).withFlux(1000).drawImage(scale=0.2, nx=10, ny=101)
+        )
+        with pytest.raises(RuntimeError):
+            im.addNoise(nse)
 
     # do a basic check
     im = galsim.Gaussian(fwhm=2.0).withFlux(1000).drawImage(scale=0.2, nx=101, ny=101)
