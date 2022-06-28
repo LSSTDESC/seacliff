@@ -1,4 +1,4 @@
-# this bloack ensures this code works for python < 3.8 where importlib.metadata is
+# this block ensures this code works for python < 3.8 where importlib.metadata is
 # not in the stdlib
 try:
     from importlib.metadata import version, PackageNotFoundError
@@ -13,3 +13,4 @@ except PackageNotFoundError:
 
 from .rubin_sky_wcs import RubinSkyWCS  # noqa
 from .rubin_psf import RubinPSF  # noqa
+from .rubin_noise import RubinNoise  # noqa
