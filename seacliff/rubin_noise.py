@@ -140,10 +140,11 @@ class RubinNoise(BaseNoise):
     Parameters
     ----------
     calexp_or_sky_level : lsst.afw.image.Exposure, galsim.Image, or float
-        A Rubin calexp from which to extract the sky level and gain, or an image
-        of the sky level in a Rubin calexp.
+        A Rubin calexp from which to extract the sky level and gain, an image
+        of the sky level in a Rubin calexp, or a float value with the sky level.
     gain : galsim.Image, float, or None, optional
-        Only relevant if `calexp_or_sky_level` is a sky level.
+        The gain as an image or a float value. Only allowed if `calexp_or_sky_level` is
+        not a Rubin calexp.
     rng : galsim.BaseDeviate or None, optional
         An RNG instance to use for generating noise.
     mad_clipping : float or None,
