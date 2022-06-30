@@ -14,3 +14,4 @@ except PackageNotFoundError:
 from .rubin_sky_wcs import RubinSkyWCS  # noqa
 from .rubin_psf import RubinPSF  # noqa
 from .rubin_noise import RubinNoise  # noqa
+from . import config  # noqa
