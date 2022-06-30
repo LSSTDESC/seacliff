@@ -29,12 +29,13 @@ class CalexpLoader(galsim.config.InputLoader):
             # dtype: double  # one of double, float, int or long, default is double
         ```
     """
+
     def getKwargs(self, config, base, logger):
         req = {"file_name": str}
         opt = {"dtype": str}
         kwargs, safe = galsim.config.GetAllParams(config, base, req=req, opt=opt)
         if self.takes_logger:
-            kwargs['logger'] = logger
+            kwargs["logger"] = logger
         return kwargs, True
 
     def initialize(self, input_objs, num, base, logger):
@@ -45,6 +46,6 @@ class CalexpLoader(galsim.config.InputLoader):
 
 
 galsim.config.RegisterInputType(
-    'calexp',
+    "calexp",
     CalexpLoader(_read_calexp, file_scope=True, takes_logger=True),
 )

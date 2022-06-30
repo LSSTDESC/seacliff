@@ -6,6 +6,4 @@ from . import input  # noqa
 import galsim.config.value_eval
 
 # this is always available
-galsim.config.value_eval.eval_base_variables += [
-    "calexp"
-]
+galsim.config.value_eval.eval_base_variables += ["calexp"]
