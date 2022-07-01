@@ -7,8 +7,7 @@ class RubinSkyWCSBuilder(galsim.config.SimpleWCSBuilder):
 
     def getKwargs(self, build_func, config, base):
         req = {"wcs": None}
-        opt = {"origin": galsim.Position}
-        kwargs, _ = galsim.config.GetAllParams(config, base, req=req, opt=opt)
+        kwargs, _ = galsim.config.GetAllParams(config, base, req=req)
         return kwargs
 
 
