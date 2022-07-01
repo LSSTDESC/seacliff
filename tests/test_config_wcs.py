@@ -13,9 +13,11 @@ import pytest
 @pytest.mark.parametrize("dtype", ["double", "float"])
 def test_config_wcs(dtype):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
-    wcs = seacliff.RubinSkyWCS(lsst.afw.image.ExposureD.readFits(
-        os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
-    ).getWcs())
+    wcs = seacliff.RubinSkyWCS(
+        lsst.afw.image.ExposureD.readFits(
+            os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
+        ).getWcs()
+    )
     with tempfile.TemporaryDirectory() as tmpdir:
         img_pth = os.path.join(str(tmpdir), "test.fits")
         config = {
@@ -45,20 +47,26 @@ def test_config_wcs(dtype):
             },
             "output": {
                 "file_name": img_pth,
-            }
+            },
         }
 
         galsim.config.Process(config)
         assert os.path.exists(img_pth)
 
-        img = galsim.Convolve([
-            galsim.Gaussian(fwhm=0.8),
-            galsim.Exponential(half_light_radius=0.5, flux=1e5),
-        ]).drawImage(
-            nx=53,
-            ny=53,
-            wcs=wcs.local(galsim.PositionD(27, 27)),
-        ).array
+        img = (
+            galsim.Convolve(
+                [
+                    galsim.Gaussian(fwhm=0.8),
+                    galsim.Exponential(half_light_radius=0.5, flux=1e5),
+                ]
+            )
+            .drawImage(
+                nx=53,
+                ny=53,
+                wcs=wcs.local(galsim.PositionD(27, 27)),
+            )
+            .array
+        )
 
         img_config = galsim.fits.read(img_pth).array
         assert_allclose(img, img_config)
