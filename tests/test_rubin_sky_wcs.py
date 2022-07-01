@@ -146,14 +146,20 @@ def test_rubin_sky_wcs_origin():
     assert wcs1.origin.y == wcs1.wcs.getPixelOrigin().y + 1
 
 
-@pytest.mark.parametrize("bounds", [
-    galsim.BoundsI(1, 10, 1, 10),
-    galsim.BoundsI(0, 9, 0, 9),
-])
-@pytest.mark.parametrize("shift", [
-    galsim.PositionD(0, 0),
-    galsim.PositionD(-5.5, 6.7),
-])
+@pytest.mark.parametrize(
+    "bounds",
+    [
+        galsim.BoundsI(1, 10, 1, 10),
+        galsim.BoundsI(0, 9, 0, 9),
+    ],
+)
+@pytest.mark.parametrize(
+    "shift",
+    [
+        galsim.PositionD(0, 0),
+        galsim.PositionD(-5.5, 6.7),
+    ],
+)
 def test_rubin_sky_wcs_fits_header(bounds, shift):
     wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
     wcs1 = wcs1.shiftOrigin(shift)
@@ -166,5 +172,5 @@ def test_rubin_sky_wcs_fits_header(bounds, shift):
     assert im_origin.y == bounds.ymin
     assert_allclose(
         wcs1.xyToradec(XTEST, YTEST, units=galsim.degrees),
-        wcs2.xyToradec(XTEST, YTEST, units=galsim.degrees)
+        wcs2.xyToradec(XTEST, YTEST, units=galsim.degrees),
     )

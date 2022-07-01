@@ -39,10 +39,11 @@ class CalexpLoader(galsim.config.InputLoader):
         return kwargs, True
 
     def initialize(self, input_objs, num, base, logger):
-        if len(input_objs) == 1:
-            base["calexp"] = input_objs[0]
-        else:
-            base["calexp"] = input_objs
+        if all(iobj is not None for iobj in input_objs):
+            if len(input_objs) == 1:
+                base["calexp"] = input_objs[0]
+            else:
+                base["calexp"] = input_objs
 
 
 galsim.config.RegisterInputType(

@@ -86,8 +86,8 @@ class RubinSkyWCS(CelestialWCS):
         # see https://github.com/lsst/afw/blob/main/include/lsst/afw/geom/SkyWcs.h#L92
         # galsim handles the origin itself so we account for that here
         # it will add the origin on the way out
-        x += (1 - self.origin.x)
-        y += (1 - self.origin.y)
+        x += 1 - self.origin.x
+        y += 1 - self.origin.y
 
         if np.ndim(ra) == np.ndim(dec) and np.ndim(ra) == 0:
             return x[0], y[0]
@@ -119,11 +119,8 @@ class RubinSkyWCS(CelestialWCS):
         )
 
     def __repr__(self):
-        return (
-            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r))"
-            % (
-                self.wcs_str,
-            )
+        return "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r))" % (
+            self.wcs_str,
         )
 
     def __hash__(self):
