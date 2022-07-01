@@ -70,15 +70,12 @@ def _test_pos(wcs1, wcs2, shift=None):
 
 @pytest.mark.parametrize("x,y", [(XTEST, YTEST), (XTEST[0], YTEST[0])])
 def test_rubin_sky_wcs_correct(x, y):
-    x0 = 10
-    y0 = 2
-
-    wcs = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(x0, y0))
+    wcs = seacliff.RubinSkyWCS(_make_wcs(10))
     ra, dec = wcs.xyToradec(x, y, units=galsim.degrees)
 
     ra_rubin, dec_rubin = wcs.wcs.pixelToSkyArray(
-        np.atleast_1d(x - x0 - 1),
-        np.atleast_1d(y - y0 - 1),
+        np.atleast_1d(x - 1),
+        np.atleast_1d(y - 1),
         degrees=True,
     )
     assert_allclose(ra, ra_rubin)
@@ -90,7 +87,7 @@ def test_rubin_sky_wcs_correct(x, y):
 
 
 def test_rubin_sky_wcs_raises():
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
     with pytest.raises(RuntimeError):
         wcs1.xyToradec(np.array([10]), np.array([10, 10]), units=galsim.degrees)
 
@@ -99,16 +96,16 @@ def test_rubin_sky_wcs_raises():
 
 
 def test_rubin_sky_wcs_equal():
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
     assert wcs1 == wcs1
     _test_pos(wcs1, wcs1)
 
-    wcs2 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs2 = seacliff.RubinSkyWCS(_make_wcs(10))
     assert wcs1 == wcs2
     assert wcs2 is not wcs1
     _test_pos(wcs1, wcs2)
 
-    wcs3 = seacliff.RubinSkyWCS(_make_wcs(10))
+    wcs3 = wcs1.shiftOrigin(galsim.PositionD(56.1, 78.5))
     assert wcs3 == wcs3
     assert wcs1 != wcs3
     assert wcs2 != wcs3
@@ -123,7 +120,7 @@ def test_rubin_sky_wcs_equal():
 
 
 def test_rubin_sky_wcs_pickle_eval_repr_copy():
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
     wcs6 = wcs1.copy()
     assert wcs6 == wcs1
     assert wcs6 is not wcs1
@@ -136,8 +133,44 @@ def test_rubin_sky_wcs_pickle_eval_repr_copy():
 def test_rubin_sky_wcs_origin():
     dx = 3
     dy = -2
-    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10), origin=galsim.PositionD(10, 2))
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
     wcs2 = wcs1.shiftOrigin(galsim.PositionD(dx, dy))
     _test_pos(wcs1, wcs2, shift=galsim.PositionD(dx, dy))
 
     assert wcs1.wcs is not wcs2.wcs
+
+    assert wcs2.origin.x - wcs1.origin.x == 3
+    assert wcs2.origin.y - wcs1.origin.y == -2
+
+    assert wcs1.origin.x == wcs1.wcs.getPixelOrigin().x + 1
+    assert wcs1.origin.y == wcs1.wcs.getPixelOrigin().y + 1
+
+
+@pytest.mark.parametrize(
+    "bounds",
+    [
+        galsim.BoundsI(1, 10, 1, 10),
+        galsim.BoundsI(0, 9, 0, 9),
+    ],
+)
+@pytest.mark.parametrize(
+    "shift",
+    [
+        galsim.PositionD(0, 0),
+        galsim.PositionD(-5.5, 6.7),
+    ],
+)
+def test_rubin_sky_wcs_fits_header(bounds, shift):
+    wcs1 = seacliff.RubinSkyWCS(_make_wcs(10))
+    wcs1 = wcs1.shiftOrigin(shift)
+
+    hdr = {}
+    wcs1.writeToFitsHeader(hdr, bounds)
+    wcs2, im_origin = galsim.wcs.readFromFitsHeader(hdr)
+
+    assert im_origin.x == bounds.xmin
+    assert im_origin.y == bounds.ymin
+    assert_allclose(
+        wcs1.xyToradec(XTEST, YTEST, units=galsim.degrees),
+        wcs2.xyToradec(XTEST, YTEST, units=galsim.degrees),
+    )

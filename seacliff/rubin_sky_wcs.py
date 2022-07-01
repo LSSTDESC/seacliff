@@ -2,6 +2,7 @@ import numpy as np
 
 import lsst.geom
 import lsst.afw.geom
+import galsim
 from galsim.wcs import CelestialWCS
 
 
@@ -17,15 +18,19 @@ class RubinSkyWCS(CelestialWCS):
     wcs : lsst.afw.geom.SkyWcs
         The Rubin Sky WCS to be wrapped by this class. Usually one can get this from the
         `.getWcs()` method attached to a calexp.
-    origin : PositionD or PositionI or None, optional
-        If not None, the origin position of the image coordinate system. Note that
-        the conversion from 1-based to 0-based pixel indexing is **always** done.
     """
 
-    def __init__(self, wcs, origin=None):
+    def __init__(self, wcs):
         self._wcs = wcs
         self._wcs_str = wcs.writeString()
-        self._set_origin(origin)
+        # we have the galsim origin mirror the Rubin one with the offset due to pixel
+        # indexing convetions
+        self._set_origin(
+            galsim.PositionD(
+                self.wcs.getPixelOrigin().x + 1,
+                self.wcs.getPixelOrigin().y + 1,
+            )
+        )
         # kept here so that functions in parent class can use it
         self._color = None
 
@@ -54,8 +59,9 @@ class RubinSkyWCS(CelestialWCS):
         # the input x, y are in FITS conventions so we subtract 1 to get to
         # LSST conventions
         # see https://github.com/lsst/afw/blob/main/include/lsst/afw/geom/SkyWcs.h#L92
-        _x = np.atleast_1d(x) - 1
-        _y = np.atleast_1d(y) - 1
+        # galsim subtracts the origin on the way in so we handle that here
+        _x = np.atleast_1d(x) - 1 + self.origin.x
+        _y = np.atleast_1d(y) - 1 + self.origin.y
         ra, dec = self.wcs.pixelToSkyArray(_x, _y, degrees=False)
 
         if np.ndim(x) == np.ndim(y) and np.ndim(y) == 0:
@@ -78,8 +84,10 @@ class RubinSkyWCS(CelestialWCS):
         # the output x, y are in Rubin conventions so we add 1 to get to
         # FITS conventions
         # see https://github.com/lsst/afw/blob/main/include/lsst/afw/geom/SkyWcs.h#L92
-        x += 1
-        y += 1
+        # galsim handles the origin itself so we account for that here
+        # it will add the origin on the way out
+        x += 1 - self.origin.x
+        y += 1 - self.origin.y
 
         if np.ndim(ra) == np.ndim(dec) and np.ndim(ra) == 0:
             return x[0], y[0]
@@ -92,8 +100,12 @@ class RubinSkyWCS(CelestialWCS):
 
     def _newOrigin(self, origin):
         return RubinSkyWCS(
-            self.wcs.copyAtShiftedPixelOrigin(lsst.geom.Extent2D(0)),
-            origin=origin,
+            self.wcs.copyAtShiftedPixelOrigin(
+                lsst.geom.Extent2D(
+                    origin.x - self.origin.x,
+                    origin.y - self.origin.y,
+                ),
+            ),
         )
 
     def __eq__(self, other):
@@ -107,12 +119,8 @@ class RubinSkyWCS(CelestialWCS):
         )
 
     def __repr__(self):
-        return (
-            "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r), origin=%r)"
-            % (
-                self.wcs_str,
-                self.origin,
-            )
+        return "seacliff.RubinSkyWCS(lsst.afw.geom.SkyWcs.readString(%r))" % (
+            self.wcs_str,
         )
 
     def __hash__(self):
@@ -132,3 +140,11 @@ class RubinSkyWCS(CelestialWCS):
 
     def __deepcopy__(self, memo):
         return self.copy()
+
+    def _writeHeader(self, header, bounds):
+        # this currently produces a TAN WCS (possibly approximate)
+        # in the future it will be TAN-SIP: https://jira.lsstcorp.org/browse/DM-13170
+        # the Rubin SkyWcs will add 1 on the way out here when making the header
+        md = self.wcs.getFitsMetadata(False).toDict()
+        for k, v in md.items():
+            header[k] = v
