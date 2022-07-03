@@ -42,7 +42,6 @@ def test_config_psf(deconvolve_pixel):
                 "type": "RubinPSF",
                 "psf": "$(@input.calexp).getPsf()",
                 "deconvolve_pixel": deconvolve_pixel,
-
             },
             "image": {
                 "type": "Single",
@@ -96,7 +95,6 @@ def test_config_psf_raises():
             "psf": {
                 "type": "RubinPSF",
                 "deconvolve_pixel": False,
-
             },
             "image": {
                 "type": "Single",
@@ -130,7 +128,6 @@ def test_config_psf_raises():
                 "psf": "$(@input.calexp).getPsf()",
                 "deconvolve_pixel": True,
                 "depixelize": True,
-
             },
             "image": {
                 "type": "Single",

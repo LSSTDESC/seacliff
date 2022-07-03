@@ -5,9 +5,7 @@ from seacliff import RubinPSF
 
 def _build_rubin_psf(config, base, ignore, gsparams, logger):
     opt = {"deconvolve_pixel": bool, "depixelize": bool, "wcs": None, "psf": None}
-    params, safe = galsim.config.GetAllParams(
-        config, base, opt=opt, ignore=ignore
-    )
+    params, safe = galsim.config.GetAllParams(config, base, opt=opt, ignore=ignore)
 
     if (
         "deconvolve_pixel" in params
@@ -37,8 +35,8 @@ def _build_rubin_psf(config, base, ignore, gsparams, logger):
             "RubinPSF could not find `wcs` in base galsim config or inputs!"
         )
 
-    if 'image_pos' in base:
-        image_pos = base['image_pos']
+    if "image_pos" in base:
+        image_pos = base["image_pos"]
     else:
         raise RuntimeError("RubinPSF could not find `image_pos` in base galsim config!")
 
@@ -57,4 +55,4 @@ def _build_rubin_psf(config, base, ignore, gsparams, logger):
     return psf, False
 
 
-galsim.config.RegisterObjectType('RubinPSF', _build_rubin_psf)
+galsim.config.RegisterObjectType("RubinPSF", _build_rubin_psf)
