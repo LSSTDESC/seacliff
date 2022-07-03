@@ -1,0 +1,31 @@
+modules:
+  - seacliff
+
+input:
+  calexp:
+    file_name: "tests/data/cexp.fits.fz"
+
+gal:
+  type: Exponential
+  half_light_radius: 0.5
+  flux: 1e5
+
+psf:
+  type: RubinPSF
+  psf: "$(@input.calexp).getPsf()"
+  deconvolve_pixel: True
+
+image:
+  type: Single
+  wcs:
+    type: RubinSkyWCS
+    wcs: "$(@input.calexp).getWcs()"
+
+  noise:
+    type: Gaussian
+    sigma: 30
+
+  size: 53
+
+output:
+    file_name: image_with_rubin_wcs.fits

@@ -10,13 +10,20 @@ import galsim
 import pytest
 
 
-@pytest.mark.parametrize("dtype", ["double", "float"])
-def test_config_wcs(dtype):
+@pytest.mark.parametrize("deconvolve_pixel", [True, False])
+@pytest.mark.parametrize("use_calexp", [False])  # TODO add true in galsim 2.4
+def test_config_psf(deconvolve_pixel, use_calexp):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     wcs = seacliff.RubinSkyWCS(
         lsst.afw.image.ExposureD.readFits(
             os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
         ).getWcs()
+    )
+    psf = seacliff.RubinPSF(
+        lsst.afw.image.ExposureD.readFits(
+            os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
+        ).getPsf(),
+        wcs,
     )
     with tempfile.TemporaryDirectory() as tmpdir:
         img_pth = os.path.join(str(tmpdir), "test.fits")
@@ -25,7 +32,6 @@ def test_config_wcs(dtype):
             "input": {
                 "calexp": {
                     "file_name": wcs_pth,
-                    "dtype": dtype,
                 },
             },
             "gal": {
@@ -34,8 +40,9 @@ def test_config_wcs(dtype):
                 "flux": 1e5,
             },
             "psf": {
-                "type": "Gaussian",
-                "fwhm": 0.8,
+                "type": "RubinPSF",
+                "psf": "$(@input.calexp).getPsf()",
+                "deconvolve_pixel": deconvolve_pixel,
             },
             "image": {
                 "type": "Single",
@@ -50,20 +57,25 @@ def test_config_wcs(dtype):
             },
         }
 
+        if use_calexp:
+            del config["image"]["wcs"]["wcs"]
+            del config["psf"]["psf"]
+
         galsim.config.Process(config)
         assert os.path.exists(img_pth)
+        img_pos = galsim.PositionD(27, 27)
 
         img = (
             galsim.Convolve(
                 [
-                    galsim.Gaussian(fwhm=0.8),
+                    psf.getPSF(img_pos, deconvolve_pixel=deconvolve_pixel),
                     galsim.Exponential(half_light_radius=0.5, flux=1e5),
                 ]
             )
             .drawImage(
                 nx=53,
                 ny=53,
-                wcs=wcs.local(galsim.PositionD(27, 27)),
+                wcs=wcs.local(img_pos),
             )
             .array
         )
@@ -72,9 +84,12 @@ def test_config_wcs(dtype):
         assert_allclose(img, img_config)
 
 
-def test_config_wcs_raises():
+def test_config_psf_raises():
+    wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     with tempfile.TemporaryDirectory() as tmpdir:
         img_pth = os.path.join(str(tmpdir), "test.fits")
+
+        # no PSF
         config = {
             "modules": ["seacliff"],
             "gal": {
@@ -83,22 +98,53 @@ def test_config_wcs_raises():
                 "flux": 1e5,
             },
             "psf": {
-                "type": "Gaussian",
-                "fwhm": 0.8,
+                "type": "RubinPSF",
+                "deconvolve_pixel": False,
             },
             "image": {
                 "type": "Single",
-                "wcs": {
-                    "type": "RubinSkyWCS",
-                },
+                "pixel_scale": 0.2,
                 "size": 53,
             },
             "output": {
                 "file_name": img_pth,
             },
         }
-
         with pytest.raises(RuntimeError) as e:
             galsim.config.Process(config)
 
-        assert "RubinWCS" in str(e.value)
+        assert "RubinPSF" in str(e.value)
+
+        # set properties wrong
+        config = {
+            "modules": ["seacliff"],
+            "input": {
+                "calexp": {
+                    "file_name": wcs_pth,
+                },
+            },
+            "gal": {
+                "type": "Exponential",
+                "half_light_radius": 0.5,
+                "flux": 1e5,
+            },
+            "psf": {
+                "type": "RubinPSF",
+                "psf": "$(@input.calexp).getPsf()",
+                "deconvolve_pixel": True,
+                "depixelize": True,
+            },
+            "image": {
+                "type": "Single",
+                "pixel_scale": 0.2,
+                "size": 53,
+            },
+            "output": {
+                "file_name": img_pth,
+            },
+        }
+        with pytest.raises(RuntimeError) as e:
+            galsim.config.Process(config)
+
+        assert "deconvolve_pixel" in str(e.value)
+        assert "depixelize" in str(e.value)
