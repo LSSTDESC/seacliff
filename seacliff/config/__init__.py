@@ -2,6 +2,7 @@
 # config parser
 from . import input  # noqa
 from . import wcs  # noqa
+from . import psf  # noqa
 
 # these variables are always available for eval
 import galsim.config.value_eval

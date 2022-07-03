@@ -62,7 +62,9 @@ class RubinPSF(object):
 
         return self._psf_bytes
 
-    def getPSF(self, image_pos, color=None, gsparams=None, **kwargs):
+    def getPSF(
+        self, image_pos, color=None, gsparams=None, deconvolve_pixel=False, **kwargs
+    ):
         """Get the PSF at a position in the image.
 
         Parameters
@@ -76,6 +78,10 @@ class RubinPSF(object):
         gsparams : galsim.GSParams or None, optional
             An optional galsim parameter class for controlling the returned
             InterpolateImage.
+        deconvolve_pixel : bool, optional
+            If True, a pixel deconvolution will be applied to the PSF image. In this
+            case the PSF should always be rendered with a Galsim `draw_method` that
+            includes the pixel (i.e., NOT 'nopixel').
         **kwargs : extra keywords, optional
             All extra keyword arguments are passed to the galsim.InterpolatedImage
             returned by this method. The `offset`, `gsparams`, `wcs`, and
@@ -121,6 +127,11 @@ class RubinPSF(object):
             use_true_center=True,
             **kwargs,
         )
+
+        if deconvolve_pixel:
+            inv_pixel = galsim.Deconvolve(jac.toWorld(galsim.Pixel(1.0)))
+            im = galsim.Convolve([im, inv_pixel])
+
         return im
 
     def copy(self, memo=None):
