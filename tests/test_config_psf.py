@@ -11,6 +11,7 @@ import pytest
 
 
 @pytest.mark.parametrize("deconvolve_pixel", [True, False])
+@pytest.mark.parametrize("use_calexp", [True, False])
 def test_config_psf(deconvolve_pixel):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     wcs = seacliff.RubinSkyWCS(
@@ -55,6 +56,10 @@ def test_config_psf(deconvolve_pixel):
                 "file_name": img_pth,
             },
         }
+
+        if use_calexp:
+            del config["image"]["wcs"]["wcs"]
+            del config["psf"]["psf"]
 
         galsim.config.Process(config)
         assert os.path.exists(img_pth)
