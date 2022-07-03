@@ -12,7 +12,7 @@ import pytest
 
 @pytest.mark.parametrize("deconvolve_pixel", [True, False])
 @pytest.mark.parametrize("use_calexp", [True, False])
-def test_config_psf(deconvolve_pixel):
+def test_config_psf(deconvolve_pixel, use_calexp):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     wcs = seacliff.RubinSkyWCS(
         lsst.afw.image.ExposureD.readFits(
