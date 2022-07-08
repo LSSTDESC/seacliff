@@ -208,25 +208,21 @@ class RubinNoise(BaseNoise):
         return self._gn
 
     def _applyTo(self, image):
-        if (
-            isinstance(self.sky_level, galsim.Image)
-            and image.bounds != self.sky_level.bounds
-        ) or (isinstance(self.gain, galsim.Image) and image.bounds != self.gain.bounds):
-            raise RuntimeError(
-                "The image must have the same pixel bounds as the sky level and gain!"
-            )
-
         # the noise array is in ADU
         noise_array = np.empty(np.prod(image.array.shape), dtype=float)
         noise_array[:] = image.array.flatten()
 
+        # we cut the internal images to the input bounds
+        bounds = image.bounds
+
+        # comments below from galsim
         # Minor subtlety for integer images. It's a bit more consistent to convert to an
         # integer with the sky still added and then subtract off the sky. But this isn't
         # quite right if the sky has a fractional part.  So only subtract off the
         # integer part of the sky at the end. For float images, you get the same answer
         # either way, so it doesn't matter.
         if isinstance(self.sky_level, galsim.Image):
-            sv = self.sky_level.array.flatten()
+            sv = self.sky_level[bounds].array.flatten()
         else:
             sv = self.sky_level
 
@@ -240,7 +236,7 @@ class RubinNoise(BaseNoise):
         # added but in ADU.
         # We convert to e-, make the random draw, then convert back.
         if isinstance(self.gain, galsim.Image):
-            gn = self.gain.array.flatten()
+            gn = self.gain[bounds].array.flatten()
         else:
             gn = self.gain
 

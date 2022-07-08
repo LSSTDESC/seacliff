@@ -3,6 +3,7 @@
 from . import input  # noqa
 from . import wcs  # noqa
 from . import psf  # noqa
+from . import noise  # noqa
 
 # these variables are always available for eval
 import galsim.config.value_eval
