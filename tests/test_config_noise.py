@@ -13,7 +13,6 @@ import galsim
 
 import pytest
 
-# 26, 29, 77-84, 110
 
 
 @pytest.mark.parametrize("include_obj_var", [True, False])
