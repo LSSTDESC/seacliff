@@ -212,9 +212,17 @@ def test_rubin_noise_apply_image(gain_arr, sky_arr, dim):
 
     sd = np.std(arrs, axis=0)
     bnds = im_orig.bounds
+    if sky_arr:
+        _sv = sv[bnds]
+    else:
+        _sv = sv
+    if gain_arr:
+        _gn = gain[bnds]
+    else:
+        _gn = gain
     assert_allclose(
         sd,
-        np.sqrt(((im_orig + sv[bnds]) / gain[bnds]).array),
+        np.sqrt(((im_orig + _sv) / _gn).array),
         atol=0,
         rtol=0.1,
     )
