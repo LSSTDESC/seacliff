@@ -14,7 +14,6 @@ import galsim
 import pytest
 
 
-
 @pytest.mark.parametrize("include_obj_var", [True, False])
 @pytest.mark.parametrize(
     "draw_method,flux",
