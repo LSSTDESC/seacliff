@@ -17,12 +17,15 @@ import pytest
 
 
 @pytest.mark.parametrize("include_obj_var", [True, False])
-@pytest.mark.parametrize("draw_method,flux", [
-    ("phot", 0),
-    ("phot", 1e5),
-    ("fft", 0),
-    ("fft", 1e100),
-])
+@pytest.mark.parametrize(
+    "draw_method,flux",
+    [
+        ("phot", 0),
+        ("phot", 1e5),
+        ("fft", 0),
+        ("fft", 1e100),
+    ],
+)
 def test_config_noise(draw_method, flux, include_obj_var):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     calexp = lsst.afw.image.ExposureD.readFits(
@@ -74,18 +77,15 @@ def test_config_noise(draw_method, flux, include_obj_var):
             },
         }
 
-        img = (
-            galsim.Convolve(
-                [
-                    galsim.Gaussian(fwhm=0.8),
-                    galsim.Exponential(half_light_radius=0.5, flux=1e5),
-                ]
-            )
-            .drawImage(
-                nx=53,
-                ny=53,
-                wcs=wcs.local(galsim.PositionD(27, 27)),
-            )
+        img = galsim.Convolve(
+            [
+                galsim.Gaussian(fwhm=0.8),
+                galsim.Exponential(half_light_radius=0.5, flux=1e5),
+            ]
+        ).drawImage(
+            nx=53,
+            ny=53,
+            wcs=wcs.local(galsim.PositionD(27, 27)),
         )
 
         for pth in [img_pth, wgt_pth]:
@@ -128,10 +128,13 @@ def test_config_noise(draw_method, flux, include_obj_var):
             assert_allclose(wgt, 1.0 / true_var_noimg_full, **kwargs)
 
 
-@pytest.mark.parametrize("key", [
-    pytest.param("sky_level", marks=pytest.mark.xfail),
-    "sky_level_pixel",
-])
+@pytest.mark.parametrize(
+    "key",
+    [
+        pytest.param("sky_level", marks=pytest.mark.xfail),
+        "sky_level_pixel",
+    ],
+)
 def test_config_noise_raises(key):
     wcs_pth = os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
     with tempfile.TemporaryDirectory() as tmpdir:

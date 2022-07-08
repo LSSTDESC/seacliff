@@ -9,15 +9,15 @@ from seacliff import RubinNoise
 class RubinNoiseBuilder(NoiseBuilder):
     def _get_params(self, config, base):
         sky_pars = ["sky_level", "sky_level_pixel"]
-        if any(p in base['image'] for p in sky_pars):
+        if any(p in base["image"] for p in sky_pars):
             raise RuntimeError(
-                "The sky level cannot be given in image "
-                "when using RubinNoise!"
+                "The sky level cannot be given in image " "when using RubinNoise!"
             )
 
-        opt = {'mad_clipping': float, "calexp": None}
+        opt = {"mad_clipping": float, "calexp": None}
         params = galsim.config.GetAllParams(
-            config, base,
+            config,
+            base,
             opt=opt,
             ignore=noise_ignore,
         )[0]
@@ -42,8 +42,8 @@ class RubinNoiseBuilder(NoiseBuilder):
             id(pars["calexp"]),
             pars.get("mad_clipping", None),
             id(base),
-            base['file_num'],
-            base['image_num'],
+            base["file_num"],
+            base["image_num"],
         )
         if (
             config.get("_current_noise_tag", None) != tag
@@ -85,7 +85,7 @@ class RubinNoiseBuilder(NoiseBuilder):
 
         # if we are photon shooting, then the variance from objects is in the image
         # already so we do not add that.
-        if draw_method == 'phot':
+        if draw_method == "phot":
             bnds = im.bounds
             # make an image in electrons
             noise_im = rnse.sky_level[bnds].copy() * rnse.gain[bnds]
@@ -104,7 +104,7 @@ class RubinNoiseBuilder(NoiseBuilder):
     def getNoiseVariance(self, config, base, full=False):
         _, ret_var, var_full = self._get_rubin_noise(config, base)
         if full:
-            bounds = base['current_noise_image'].bounds
+            bounds = base["current_noise_image"].bounds
             return var_full[bounds].copy()
         else:
             return ret_var
@@ -112,10 +112,10 @@ class RubinNoiseBuilder(NoiseBuilder):
     def addNoiseVariance(self, config, base, im, include_obj_var, logger):
         rnse, _, _ = self._get_rubin_noise(config, base)
         if include_obj_var:
-            bounds = base['current_noise_image'].bounds
-            im += (base['current_noise_image'] / rnse.gain[bounds])
+            bounds = base["current_noise_image"].bounds
+            im += base["current_noise_image"] / rnse.gain[bounds]
 
         im += self.getNoiseVariance(config, base, full=True)
 
 
-galsim.config.RegisterNoiseType('RubinNoise', RubinNoiseBuilder())
+galsim.config.RegisterNoiseType("RubinNoise", RubinNoiseBuilder())
