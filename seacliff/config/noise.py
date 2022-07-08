@@ -11,7 +11,7 @@ class RubinNoiseBuilder(NoiseBuilder):
         sky_pars = ["sky_level", "sky_level_pixel"]
         if any(p in base["image"] for p in sky_pars):
             raise RuntimeError(
-                "The sky level cannot be given in image " "when using RubinNoise!"
+                "The sky level cannot be given in image when using RubinNoise!"
             )
 
         opt = {"mad_clipping": float, "calexp": None}
