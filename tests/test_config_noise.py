@@ -21,7 +21,7 @@ import pytest
         ("phot", 0),
         ("phot", 1e5),
         ("fft", 0),
-        ("fft", 1e5),
+        ("fft", 1e10),
     ],
 )
 def test_config_noise(draw_method, flux, include_obj_var):
@@ -103,20 +103,32 @@ def test_config_noise(draw_method, flux, include_obj_var):
 
         img_config = galsim.fits.read(img_pth).array
         var = np.var(img_config - img.array)
-        assert_allclose(var, true_var, rtol=0.1)
 
-        # hack in some fields this expects and are normally there
-        _cfg["file_num"] = 1
-        _cfg["image_num"] = 2
-        _cfg["image"]["noise"]["calexp"] = calexp
-        ret_var = nse_build.getNoiseVariance(_cfg["image"]["noise"], _cfg)
-        assert_allclose(var, ret_var, rtol=0.1)
-        # the subimage is slightly different than the full image in its mean
-        assert_allclose(ret_var, true_var_noimg, rtol=1e-4)
+        print(
+            "flux = %g, draw_method = %s, meas var = %g, var = %g, var no img = %g"
+            % (flux, draw_method, var, true_var, true_var_noimg),
+            flush=True,
+        )
+
+        assert_allclose(var, true_var, rtol=0.2)
+
+        if flux >= 1e10:
+            assert not np.allclose(var, true_var_noimg, rtol=0.2)
+
+        if flux == 0:
+            # compare to returned sky var too
+            # hack in some fields this expects and are normally there
+            _cfg["file_num"] = 1
+            _cfg["image_num"] = 2
+            _cfg["image"]["noise"]["calexp"] = calexp
+            ret_var = nse_build.getNoiseVariance(_cfg["image"]["noise"], _cfg)
+            assert_allclose(var, ret_var, rtol=0.1)
+            # the subimage is slightly different than the full image in its mean
+            assert_allclose(ret_var, true_var_noimg, rtol=1e-4)
 
         wgt = galsim.fits.read(wgt_pth).array
         if draw_method == "fft" or (draw_method == "phot" and not include_obj_var):
-            kwargs = {}
+            kwargs = {"rtol": 1e-6}
         else:
             # photons cause noise in the image part of the weight map
             kwargs = {"rtol": 0.05}
