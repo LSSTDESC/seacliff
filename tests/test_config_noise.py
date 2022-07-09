@@ -110,7 +110,7 @@ def test_config_noise(draw_method, flux, include_obj_var):
             flush=True,
         )
 
-        assert_allclose(var, true_var, rtol=0.2)
+        assert_allclose(var, true_var, rtol=0.5 if flux > 1e5 else 0.1)
 
         if flux >= 1e10:
             assert not np.allclose(var, true_var_noimg, rtol=0.2)
