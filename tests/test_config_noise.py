@@ -21,7 +21,7 @@ import pytest
         ("phot", 0),
         ("phot", 1e5),
         ("fft", 0),
-        ("fft", 1e100),
+        ("fft", 1e5),
     ],
 )
 def test_config_noise(draw_method, flux, include_obj_var):
@@ -45,7 +45,7 @@ def test_config_noise(draw_method, flux, include_obj_var):
             "gal": {
                 "type": "Exponential",
                 "half_light_radius": 0.5,
-                "flux": 1e5,
+                "flux": flux,
             },
             "psf": {
                 "type": "Gaussian",
@@ -78,7 +78,7 @@ def test_config_noise(draw_method, flux, include_obj_var):
         img = galsim.Convolve(
             [
                 galsim.Gaussian(fwhm=0.8),
-                galsim.Exponential(half_light_radius=0.5, flux=1e5),
+                galsim.Exponential(half_light_radius=0.5, flux=flux),
             ]
         ).drawImage(
             nx=53,
