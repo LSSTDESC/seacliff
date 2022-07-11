@@ -21,10 +21,10 @@ image:
     wcs: "$(@input.calexp).getWcs()"
 
   noise:
-    type: Gaussian
-    sigma: 30
+    type: RubinNoise
+    calexp: "$(@input.calexp)"
 
   size: 53
 
 output:
-  file_name: image_with_rubin_wcs.fits
+  file_name: image_with_rubin_noise.fits
