@@ -76,7 +76,7 @@ class RubinNoiseBuilder(NoiseBuilder):
         if current_var:
             if np.any(var_full.array < current_var):
                 raise RuntimeError(
-                    "Whitening already added more noise than the sky "
+                    "Whitening/symmetrizing already added more noise than the sky "
                     "for the RubinNoise model!"
                 )
 

@@ -230,3 +230,86 @@ def test_config_noise_calexp_raises():
         _cfg = copy.deepcopy(config)
         _cfg["calexp"] = calexp
         galsim.config.Process(_cfg)
+
+
+def test_config_noise_current_var():
+    calexp = lsst.afw.image.ExposureD.readFits(
+        os.path.join(os.path.dirname(__file__), "data", "cexp.fits.fz")
+    )
+    nse = seacliff.RubinNoise(calexp)
+    nse_build = RubinNoiseBuilder()
+    base = {
+        "modules": ["seacliff"],
+        "calexp": calexp,
+        "gal": {
+            "type": "Exponential",
+            "half_light_radius": 0.5,
+            "flux": 0,
+        },
+        "psf": {
+            "type": "Gaussian",
+            "fwhm": 0.8,
+        },
+        "image": {
+            "type": "Single",
+            "wcs": {
+                "type": "RubinSkyWCS",
+            },
+            "noise": {
+                "type": "RubinNoise",
+            },
+            "size": 53,
+        },
+    }
+
+    img = galsim.ImageD(53, 53)
+    rng = galsim.BaseDeviate(24132)
+    draw_method = "fft"
+    logger = None
+    current_var = 1e3
+    img.addNoise(galsim.GaussianNoise(sigma=np.sqrt(1e3), rng=rng))
+
+    base["file_num"] = 1
+    base["image_num"] = 2
+
+    rv = nse_build.addNoise(
+        base["image"]["noise"],
+        base,
+        img,
+        rng,
+        current_var,
+        draw_method,
+        logger,
+    )
+    true_var_full = ((nse.sky_level[img.bounds] + img) / nse.gain[img.bounds]).array
+    true_var = np.mean(true_var_full)
+    var = np.var(img.array)
+
+    assert_allclose(var, true_var, rtol=5e-2)
+    assert_allclose(rv, true_var, rtol=5e-2)
+    assert_allclose(var, rv, rtol=5e-2)
+
+    # check that we error if too much is added
+    with pytest.raises(RuntimeError) as e:
+        img = galsim.ImageD(53, 53)
+        rng = galsim.BaseDeviate(24132)
+        draw_method = "fft"
+        logger = None
+        current_var = 5e3
+        img.addNoise(galsim.GaussianNoise(sigma=np.sqrt(5e3), rng=rng))
+
+        base["file_num"] = 1
+        base["image_num"] = 2
+
+        nse_build.addNoise(
+            base["image"]["noise"],
+            base,
+            img,
+            rng,
+            current_var,
+            draw_method,
+            logger,
+        )
+
+    assert "Whitening/symmetrizing" in str(e.value)
+    assert "RubinNoise" in str(e.value)
