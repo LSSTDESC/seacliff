@@ -1,0 +1,19 @@
+name: seacliff
+channels:
+  - conda-forge
+platforms:
+  - osx-arm64
+  - linux-64
+  - osx-64
+dependencies:
+  - galsim
+  - stackvana ==0.*
+  - pip
+  - setuptools-scm >=8
+  - setuptools >=45
+  - pytest
+  - pytest-xdist
+  - pytest-cov
+  - ruff
+
+

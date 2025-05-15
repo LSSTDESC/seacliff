@@ -1,6 +1,0 @@
-galsim
-importlib_metadata
-stackvana==0.*
-setuptools_scm>=8
-setuptools>=45
-
