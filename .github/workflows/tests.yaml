@@ -6,52 +6,31 @@ on:
       - main
   pull_request: null
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: tests
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: "3.10"
-          channels: conda-forge,defaults
+          python-version: "3.11"
+          channels: conda-forge
           channel-priority: strict
           show-channel-urls: true
-          miniforge-version: latest
-          miniforge-variant: Mambaforge
+          environment-file: environment.yml
+          activate-environment: seacliff
 
-      - name: install dev tools and code
+      - name: install code
         shell: bash -l {0}
         run: |
-          conda config --set always_yes yes
-          python -m pip install -e .
-          mamba install -y -q \
-            flake8 \
-            pytest \
-            pytest-xdist \
-            pytest-cov \
-            black
-
-      - name: lint
-        shell: bash -l {0}
-        run: |
-          flake8 seacliff
-          black --check seacliff
-
-      - name: lint tests
-        shell: bash -l {0}
-        run: |
-          flake8 tests
-          black --check tests
-
-      - name: install rubin science pipelines
-        shell: bash -l {0}
-        run: |
-          mamba install \
-            --file=requirements.txt
+          python -m pip install --no-deps --no-build-isolation -e .
 
       - name: run tests
         shell: bash -l {0}
@@ -59,4 +38,6 @@ jobs:
           pytest -n 2 -vv --cov=seacliff --cov-report=term-missing --cov-report=xml tests
 
       - name: upload coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

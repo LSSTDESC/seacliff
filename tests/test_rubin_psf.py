@@ -1,17 +1,16 @@
-import os
 import copy
-
-import pytest
+import os
 
 import galsim
 import galsim.hsm
 import lsst.afw.detection
-import lsst.geom
-from lsst.meas.algorithms import KernelPsf
-from lsst.afw.math import FixedKernel
 import lsst.afw.image
-from numpy.testing import assert_allclose
+import lsst.geom
 import numpy as np
+import pytest
+from lsst.afw.math import FixedKernel
+from lsst.meas.algorithms import KernelPsf
+from numpy.testing import assert_allclose
 
 import seacliff
 from seacliff.testing import check_pickle_eval_repr_copy

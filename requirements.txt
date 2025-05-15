@@ -1,5 +1,0 @@
-galsim
-importlib_metadata
-stackvana==0.*
-setuptools_scm
-setuptools_scm_git_archive

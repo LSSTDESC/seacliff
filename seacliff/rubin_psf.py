@@ -1,10 +1,10 @@
 import copy
-import galsim
 
-import lsst.geom
-import lsst.afw.image
-from lsst.afw.fits import MemFileManager
+import galsim
 import lsst.afw.detection
+import lsst.afw.image
+import lsst.geom
+from lsst.afw.fits import MemFileManager
 
 
 class RubinPSF(object):

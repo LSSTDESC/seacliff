@@ -1,17 +1,8 @@
-# this block ensures this code works for python < 3.8 where importlib.metadata is
-# not in the stdlib
-try:
-    from importlib.metadata import version, PackageNotFoundError
-except ImportError:
-    from importlib_metadata import version, PackageNotFoundError
+from ._version import __version__  # noqa: F401, I001
 
-try:
-    __version__ = version("seacliff")
-except PackageNotFoundError:
-    # package is not installed
-    pass
+from .rubin_noise import RubinNoise  # noqa: F401
+from .rubin_psf import RubinPSF  # noqa: F401
+from .rubin_sky_wcs import RubinSkyWCS  # noqa: F401
 
-from .rubin_sky_wcs import RubinSkyWCS  # noqa
-from .rubin_psf import RubinPSF  # noqa
-from .rubin_noise import RubinNoise  # noqa
-from . import config  # noqa
+# this has to come last due to potential circular imports
+from . import config  # noqa: F401

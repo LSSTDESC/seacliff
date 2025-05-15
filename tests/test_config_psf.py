@@ -1,13 +1,12 @@
 import os
 import tempfile
 
+import galsim
+import lsst.afw.image
+import pytest
 from numpy.testing import assert_allclose
 
-import lsst.afw.image
 import seacliff
-import galsim
-
-import pytest
 
 
 @pytest.mark.parametrize("deconvolve_pixel", [True, False])

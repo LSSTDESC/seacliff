@@ -1,7 +1,6 @@
-import numpy as np
-
 import galsim.config
-from galsim.config import NoiseBuilder, noise_ignore, PoissonNoise
+import numpy as np
+from galsim.config import NoiseBuilder, PoissonNoise, noise_ignore
 
 from seacliff import RubinNoise
 

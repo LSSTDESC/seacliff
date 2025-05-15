@@ -1,7 +1,7 @@
 import copy
-import numpy as np
 
 import galsim
+import numpy as np
 from galsim.noise import BaseNoise
 from galsim.random import PoissonDeviate
 
