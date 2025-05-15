@@ -1,0 +1,44 @@
+[build-system]
+requires = [
+    "setuptools>=45",
+    "setuptools_scm>=8",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seacliff"
+authors = [
+    {name = "Matthew R Becker w/ LSST-DESC"},
+]
+description = "data-driven monte carlo simulations of Rubin observations w/ galsim"
+dynamic = ["version"]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+[project.urls]
+home = "https://github.com/LSSTDESC/seacliff"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+packages = {find = {exclude=["tests*", "configs*"]}}
+package-dir = {seacliff = "seacliff"}
+
+[tool.setuptools_scm]
+write_to = "seacliff/_version.py"
+write_to_template = "__version__ = '{version}'\n"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+preview = true
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 88
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover"]
+
+[tool.coverage.run]
+omit = ["seacliff/testing.py"]

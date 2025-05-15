@@ -16,41 +16,38 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: "3.10"
-          channels: conda-forge,defaults
+          python-version: "3.11"
+          channels: conda-forge
           channel-priority: strict
           show-channel-urls: true
-          miniforge-version: latest
-          miniforge-variant: Mambaforge
 
       - name: install dev tools and code
         shell: bash -l {0}
         run: |
           conda config --set always_yes yes
-          python -m pip install -e .
+          python -m pip install --no-deps --no-build-isolation -e .
           mamba install -y -q \
-            flake8 \
             pytest \
             pytest-xdist \
             pytest-cov \
-            black
+            ruff
 
       - name: lint
         shell: bash -l {0}
         run: |
-          flake8 seacliff
-          black --check seacliff
+          ruff check seacliff
+          ruff format seacliff
 
       - name: lint tests
         shell: bash -l {0}
         run: |
-          flake8 tests
-          black --check tests
+          ruff check tests
+          ruff format tests
 
       - name: install rubin science pipelines
         shell: bash -l {0}
         run: |
-          mamba install \
+          conda install \
             --file=requirements.txt
 
       - name: run tests

@@ -128,3 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /*.fits
+seacliff/_version.py
