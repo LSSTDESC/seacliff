@@ -26,7 +26,7 @@ jobs:
         run: |
           conda config --set always_yes yes
           python -m pip install --no-deps --no-build-isolation -e .
-          mamba install -y -q \
+          conda install -y -q \
             pytest \
             pytest-xdist \
             pytest-cov \
