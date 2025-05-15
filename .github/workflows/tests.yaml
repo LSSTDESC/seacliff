@@ -26,27 +26,11 @@ jobs:
         run: |
           conda config --set always_yes yes
           python -m pip install --no-deps --no-build-isolation -e .
-          conda install -y -q \
+          conda install -q \
             pytest \
             pytest-xdist \
             pytest-cov \
             ruff
-
-      - name: lint
-        shell: bash -l {0}
-        run: |
-          ruff check seacliff
-          ruff format seacliff
-
-      - name: lint tests
-        shell: bash -l {0}
-        run: |
-          ruff check tests
-          ruff format tests
-
-      - name: install rubin science pipelines
-        shell: bash -l {0}
-        run: |
           conda install \
             --file=requirements.txt
 
