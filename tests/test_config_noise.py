@@ -1,17 +1,15 @@
+import copy
 import os
 import tempfile
-import copy
 
+import galsim
+import lsst.afw.image
+import numpy as np
+import pytest
 from numpy.testing import assert_allclose
 
-import numpy as np
-
-import lsst.afw.image
 import seacliff
 from seacliff.config.noise import RubinNoiseBuilder
-import galsim
-
-import pytest
 
 
 @pytest.mark.parametrize("include_obj_var", [True, False])

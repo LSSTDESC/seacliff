@@ -1,12 +1,11 @@
-import numpy as np
-from numpy.testing import assert_allclose
-import pytest
-
 import galsim
 import lsst.geom
+import numpy as np
+import pytest
+from numpy.testing import assert_allclose
+
 import seacliff
 from seacliff.testing import check_pickle_eval_repr_copy
-
 
 XTEST = np.array([10.0, 9.0])
 YTEST = np.array([78.0, 55.0])

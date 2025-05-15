@@ -1,8 +1,7 @@
-import numpy as np
-
-import lsst.geom
-import lsst.afw.geom
 import galsim
+import lsst.afw.geom
+import lsst.geom
+import numpy as np
 from galsim.wcs import CelestialWCS
 
 

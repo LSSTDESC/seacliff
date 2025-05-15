@@ -1,15 +1,14 @@
-import numpy as np
 import os
-from numpy.testing import assert_allclose
 
 import galsim
-
-import pytest
-
-from seacliff.testing import check_pickle_eval_repr_copy
-from seacliff.rubin_noise import get_rubin_skyvar_and_gain, RubinNoise
 import lsst.afw.image
 import lsst.afw.math
+import numpy as np
+import pytest
+from numpy.testing import assert_allclose
+
+from seacliff.rubin_noise import RubinNoise, get_rubin_skyvar_and_gain
+from seacliff.testing import check_pickle_eval_repr_copy
 
 
 def test_rubin_noise_fit_whole_image():
