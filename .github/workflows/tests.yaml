@@ -38,4 +38,6 @@ jobs:
           pytest -n 2 -vv --cov=seacliff --cov-report=term-missing --cov-report=xml tests
 
       - name: upload coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
