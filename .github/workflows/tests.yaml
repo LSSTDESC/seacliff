@@ -25,6 +25,7 @@ jobs:
           channel-priority: strict
           show-channel-urls: true
           environment-file: environment.yml
+          activate-environment: seacliff
 
       - name: install code
         shell: bash -l {0}
