@@ -11,7 +11,7 @@ from seacliff.utils import mad
 
 
 def _lin_fit_helper(x, y):
-    est = RANSACRegressor()
+    est = RANSACRegressor(random_state=42)
     est.fit(x.reshape(-1, 1), y.reshape(-1, 1))
     return est.estimator_.coef_[0], est.estimator_.intercept_[0]
 
