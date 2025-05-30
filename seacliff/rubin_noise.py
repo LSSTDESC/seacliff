@@ -31,7 +31,7 @@ def get_rubin_skyvar_and_gain(calexp):
     old_variance = calexp.variance.array
     img = calexp.image.array
     gain = img / (old_variance - new_variance)
-    return new_variance.array, gain
+    return new_variance, gain
 
 
 class RubinNoise(BaseNoise):
