@@ -31,8 +31,8 @@ def test_rubin_noise_fit_whole_image():
     exp.variance.array[:, :] = (gim_nse + bkg) / gain**2
 
     sv, gn = get_rubin_skyvar_and_gain(exp)
-    assert_allclose(gn, gain)
-    assert_allclose(sv, bkg / gain**2)
+    assert_allclose(gn, gain, rtol=1e-6, atol=1e-6)
+    assert_allclose(sv, bkg / gain**2, rtol=1e-6, atol=1e-6)
 
 
 def test_rubin_noise_with_gains_dc2():

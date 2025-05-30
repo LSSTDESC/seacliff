@@ -5,8 +5,15 @@ import numpy as np
 from galsim.noise import BaseNoise
 from galsim.random import PoissonDeviate
 from lsst.ip.isr.isrFunctions import getExposureGains
+from sklearn.linear_model import RANSACRegressor
 
 from seacliff.utils import mad
+
+
+def _lin_fit_helper(x, y):
+    est = RANSACRegressor()
+    est.fit(x.reshape(-1, 1), y.reshape(-1, 1))
+    return est.estimator_.coef_[0], est.estimator_.intercept_[0]
 
 
 def get_rubin_skyvar_and_gain(calexp):
@@ -59,8 +66,8 @@ def get_rubin_skyvar_and_gain(calexp):
             amp_im_arr = calexp.image[amp_bbox].array
             amp_var_arr = calexp.variance[amp_bbox].array
             good = np.isfinite(amp_var_arr) & np.isfinite(amp_im_arr)
-            fit = np.polyfit(amp_im_arr[good], amp_var_arr[good], deg=1)
-            gain_dict[amp_name] = 1.0 / fit[0]
+            inv_gain = _lin_fit_helper(amp_im_arr[good], amp_var_arr[good])[0]
+            gain_dict[amp_name] = 1.0 / inv_gain
 
     skyvar = calexp.variance.clone()
     gn = calexp.variance.clone()
