@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - galsim
+  - scikit-learn
   - stackvana ==0.*
   - pip
   - setuptools-scm >=8
