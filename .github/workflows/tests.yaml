@@ -6,6 +6,9 @@ on:
       - main
   pull_request: null
 
+env:
+  PY_COLORS: "1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
