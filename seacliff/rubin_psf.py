@@ -63,7 +63,13 @@ class RubinPSF(object):
         return self._psf_bytes
 
     def getPSF(
-        self, image_pos, color=None, gsparams=None, deconvolve_pixel=False, **kwargs
+        self,
+        image_pos,
+        color=None,
+        color_type=None,
+        gsparams=None,
+        deconvolve_pixel=False,
+        **kwargs,
     ):
         """Get the PSF at a position in the image.
 
@@ -73,8 +79,9 @@ class RubinPSF(object):
             The position in the image at which to draw the PSF. This position should be
             in 1-offset FITS coordinates, not 0-offset Rubin coordinates.
         color : float or None, optional
-            The color for the PSF model. Rubin's internal code comments indicate
-            that the meaning and structure of this argument is subject to change.
+            The color for the PSF model.
+        color_type : str or None, optional
+            The type of color for the PSF model (e.g., "g-r").
         gsparams : galsim.GSParams or None, optional
             An optional galsim parameter class for controlling the returned
             InterpolateImage.
@@ -94,8 +101,8 @@ class RubinPSF(object):
             An InterpolatedImage with the PSF profile.
         """
         rubin_pos = lsst.geom.Point2D(image_pos.x - 1, image_pos.y - 1)
-        if color is not None:
-            rubin_color = lsst.afw.image.Color(color)
+        if color is not None and color_type is not None:
+            rubin_color = lsst.afw.image.Color(color, color_type)
             rubin_im = self.psf.computeImage(rubin_pos, color=rubin_color)
         else:
             rubin_im = self.psf.computeImage(rubin_pos)
