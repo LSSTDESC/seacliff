@@ -2,6 +2,7 @@ name: seacliff
 channels:
   - conda-forge
 dependencies:
+  - python
   - galsim
   - scikit-learn
   - stackvana ==0.*
