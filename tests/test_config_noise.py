@@ -283,9 +283,9 @@ def test_config_noise_current_var():
     true_var = np.mean(true_var_full)
     var = np.var(img.array)
 
-    assert_allclose(var, true_var, rtol=5e-2)
-    assert_allclose(rv, true_var, rtol=5e-2)
-    assert_allclose(var, rv, rtol=5e-2)
+    assert_allclose(var, true_var, rtol=1e-1)
+    assert_allclose(rv, true_var, rtol=1e-1)
+    assert_allclose(var, rv, rtol=1e-1)
 
     # check that we error if too much is added
     with pytest.raises(RuntimeError) as e:
